@@ -1,20 +1,52 @@
 <?php
 
-function conexao(): PDO
-{
-    static $pdo = null;
+// =============================
+// DADOS DE CONEXÃO
+// =============================
 
-    if ($pdo === null) {
-        $config = require __DIR__ . '/database.php';
+// Endereço do servidor do banco de dados
+// "localhost" significa que o banco está na mesma máquina
+$host = "localhost";
 
-        $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$config['database']};charset={$config['charset']}";
+// Porta padrão do PostgreSQL
+$port = "3307";
 
-        $pdo = new PDO($dsn, $config['username'], $config['password'], [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ]);
-    }
+// Nome do banco de dados criado anteriormente
+$dbname = "locadora";
 
-    return $pdo;
+// Usuário do PostgreSQL
+$user = "root";
+
+// Senha do usuário do banco
+$password = "";
+
+
+// =============================
+// CONEXÃO COM O BANCO
+// =============================
+
+try {
+
+    // Cria uma nova conexão PDO com o PostgreSQL
+    // A string "mysql:..." é chamada de DSN (Data Source Name)
+    $conn = new PDO(
+        "mysql:host=$host;port=$port;dbname=$dbname",
+        $user,
+        $password
+    );
+
+    // Configura o modo de erro para lançar exceções
+    // Isso facilita o tratamento de erros
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+} catch (PDOException $e) {
+
+    // Caso ocorra erro na conexão, exibe a mensagem
+    echo "Erro na conexão: " . $e->getMessage();
+
+    // Interrompe a execução do script
+    exit;
 }
+
+?>
+
