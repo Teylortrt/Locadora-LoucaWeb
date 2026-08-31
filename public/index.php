@@ -1,55 +1,101 @@
 <?php
+// Front Controller — GET / redireciona para o login; demais rotas são a API JSON
 
-use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Http\Request;
+$raizApp = str_replace($_SERVER['DOCUMENT_ROOT'], '', dirname(__DIR__));
 
-define('LARAVEL_START', microtime(true));
-
-/*
-|--------------------------------------------------------------------------
-| Check If The Application Is Under Maintenance
-|--------------------------------------------------------------------------
-|
-| If the application is in maintenance / demo mode via the "down" command
-| we will load this file so that any pre-rendered content can be shown
-| instead of starting the framework, which could cause an exception.
-|
-*/
-
-if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
-    require $maintenance;
+$caminho = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+if (str_starts_with($caminho, $raizApp)) {
+    $caminho = substr($caminho, strlen($raizApp));
+}
+if (str_starts_with($caminho, '/public')) {
+    $caminho = substr($caminho, strlen('/public'));
+}
+if ($caminho === '' || $caminho === false) {
+    $caminho = '/';
 }
 
-/*
-|--------------------------------------------------------------------------
-| Register The Auto Loader
-|--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader for
-| this application. We just need to utilize it! We'll simply require it
-| into the script here so we don't need to manually load our classes.
-|
-*/
+$method = $_SERVER['REQUEST_METHOD'];
 
-require __DIR__.'/../vendor/autoload.php';
+if ($method === 'GET' && $caminho === '/') {
+    header('Location: ' . $raizApp . '/templates/login.php');
+    exit;
+}
 
-/*
-|--------------------------------------------------------------------------
-| Run The Application
-|--------------------------------------------------------------------------
-|
-| Once we have the application, we can handle the incoming request using
-| the application's HTTP kernel. Then, we will send the response back
-| to this client's browser, allowing them to enjoy our application.
-|
-*/
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE");
+header("Access-Control-Allow-Headers: Content-Type");
 
-$app = require_once __DIR__.'/../bootstrap/app.php';
+if ($method === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
-$kernel = $app->make(Kernel::class);
+spl_autoload_register(function ($classe) {
+    $prefixo = 'App\\';
+    $diretorioBase = __DIR__ . '/../src/';
+    $tamanhoPrefixo = strlen($prefixo);
 
-$response = $kernel->handle(
-    $request = Request::capture()
-)->send();
+    if (strncmp($prefixo, $classe, $tamanhoPrefixo) !== 0) {
+        return;
+    }
 
-$kernel->terminate($request, $response);
+    $classeRelativa = substr($classe, $tamanhoPrefixo);
+    $arquivo = $diretorioBase . str_replace('\\', '/', $classeRelativa) . '.php';
+
+    if (file_exists($arquivo)) {
+        require $arquivo;
+    }
+});
+
+if ($method === 'GET' && $caminho === '/filmes') {
+    $controller = new \App\Controllers\FilmeController();
+    $controller->index();
+    exit;
+}
+
+if ($method === 'POST' && $caminho === '/login') {
+    $controller = new \App\Controllers\AuthController();
+    $controller->login();
+    exit;
+}
+
+if ($method === 'POST' && $caminho === '/cadastrar') {
+    $controller = new \App\Controllers\AuthController();
+    $controller->cadastrar();
+    exit;
+}
+
+if ($method === 'POST' && $caminho === '/login-web') {
+    require_once __DIR__ . '/../src/Auth.php';
+
+    $auth  = new Auth();
+    $email = trim($_POST['email'] ?? '');
+    $senha = $_POST['senha'] ?? '';
+
+    if ($email === '' || $senha === '' || !$auth->entrar($email, $senha)) {
+        header('Location: ' . $raizApp . '/templates/login.php?erro=1');
+        exit;
+    }
+
+    header('Location: ' . $raizApp . '/templates/painel.php');
+    exit;
+}
+
+if ($method === 'POST' && $caminho === '/logout-web') {
+    require_once __DIR__ . '/../src/Auth.php';
+
+    $auth = new Auth();
+    $auth->sair();
+
+    header('Location: ' . $raizApp . '/templates/login.php');
+    exit;
+}
+
+http_response_code(404);
+echo json_encode([
+    "erro" => "Rota não encontrada",
+    "caminho" => $caminho,
+    "metodo" => $method
+]);
+exit;

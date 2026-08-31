@@ -1,0 +1,182 @@
+:root {
+    --fundo: #0f1117;
+    --fundo-card: #1a1d27;
+    --borda: #2c3040;
+    --texto: #e8eaed;
+    --texto-suave: #9aa0ad;
+    --destaque: #e8b86d;
+    --destaque-hover: #f0c98a;
+    --erro: #e06c75;
+    --sucesso: #7dcea0;
+    --input: #12141c;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    background: var(--fundo);
+    color: var(--texto);
+    min-height: 100vh;
+}
+
+a {
+    color: var(--destaque);
+    text-decoration: none;
+}
+
+.tela-central {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--fundo-card);
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+    padding: 36px 32px;
+}
+
+.marca {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.marca span {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--destaque);
+    margin-bottom: 6px;
+}
+
+.marca h1 {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.campo {
+    margin-bottom: 16px;
+}
+
+.campo label {
+    display: block;
+    font-size: 13px;
+    color: var(--texto-suave);
+    margin-bottom: 6px;
+}
+
+.campo input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--input);
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    color: var(--texto);
+    font-size: 15px;
+}
+
+.campo input:focus {
+    outline: none;
+    border-color: var(--destaque);
+}
+
+.botao {
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px;
+    background: var(--destaque);
+    color: #1a1408;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+}
+
+.botao:hover {
+    background: var(--destaque-hover);
+}
+
+.botao-sair {
+    width: auto;
+    padding: 8px 16px;
+    background: transparent;
+    color: var(--texto);
+    border: 1px solid var(--borda);
+}
+
+.botao-sair:hover {
+    background: var(--borda);
+    color: var(--texto);
+}
+
+.mensagem {
+    display: none;
+    margin-top: 16px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.mensagem.erro {
+    display: block;
+    background: rgba(224, 108, 117, 0.15);
+    color: var(--erro);
+}
+
+.topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 32px;
+    background: var(--fundo-card);
+    border-bottom: 1px solid var(--borda);
+}
+
+.topo .marca {
+    text-align: left;
+    margin-bottom: 0;
+}
+
+.topo .marca h1 {
+    font-size: 18px;
+}
+
+.conteudo {
+    max-width: 720px;
+    margin: 48px auto;
+    padding: 0 24px;
+}
+
+.conteudo h2 {
+    margin-bottom: 8px;
+}
+
+.conteudo p {
+    color: var(--texto-suave);
+    margin-bottom: 24px;
+}
+
+.perfil {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(232, 184, 109, 0.15);
+    color: var(--destaque);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
