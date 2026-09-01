@@ -6,7 +6,7 @@
 $host = "localhost";
 
 // porta padrao do Mysql 3306
-$port = "3312";
+$port = "3307";
 
 // nome do banco dados
 $dbname = "locadora";

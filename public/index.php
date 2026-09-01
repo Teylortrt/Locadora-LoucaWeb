@@ -1,7 +1,12 @@
 <?php
 // Front Controller — GET / redireciona para o login; demais rotas são a API JSON
 
-$raizApp = str_replace($_SERVER['DOCUMENT_ROOT'], '', dirname(__DIR__));
+// Normaliza os caminhos antes de compará-los. No Windows o Apache pode
+// informar DOCUMENT_ROOT com barras diferentes das usadas pelo PHP.
+$diretorioProjeto = str_replace('\\', '/', dirname(__DIR__));
+$documentRoot = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']), '/');
+$raizApp = str_replace($documentRoot, '', $diretorioProjeto);
+$raizApp = '/' . trim($raizApp, '/');
 
 $caminho = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 if (str_starts_with($caminho, $raizApp)) {
