@@ -56,6 +56,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <br>
 
 <!-- Link para visualizar a lista de cadastrados -->
-<a href="listar.php">Ver Lista</a>
+<a href="tabelaclientes.php">clientes registrados</a>
 
 
