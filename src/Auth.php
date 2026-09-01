@@ -8,7 +8,22 @@ class Auth
 
     public function __construct()
     {
-        $this->db = conexao();
+        global $conn;
+
+        if (isset($conn) && $conn instanceof PDO) {
+            $this->db = $conn;
+        } else {
+            $this->db = new PDO(
+                'mysql:host=localhost;port=3312;dbname=locadora;charset=utf8mb4',
+                'root',
+                '',
+                [
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES   => false,
+                ]
+            );
+        }
 
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();

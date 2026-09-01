@@ -1,20 +1,33 @@
 <?php
+// DADOS DA CONEXAO ( PADRAO PARA O XAMPP)
 
-function conexao(): PDO
-{
-    static $pdo = null;
 
-    if ($pdo === null) {
-        $config = require __DIR__ . '/database.php';
+// endereço do servidor
+$host = "localhost";
 
-        $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$config['database']};charset={$config['charset']}";
+// porta padrao do Mysql 3306
+$port = "3312";
 
-        $pdo = new PDO($dsn, $config['username'], $config['password'], [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ]);
-    }
+// nome do banco dados
+$dbname = "locadora";
 
-    return $pdo;
-}
+// usuario que acessa o servidor
+$user = "root";
+
+// senha do xampp
+$password = "";
+
+// conexao com o banco
+
+// cria o pdo
+$conn = new PDO(
+    "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4",
+    $user,
+    $password
+);
+
+// configura o modo de erros
+$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+
+?>
