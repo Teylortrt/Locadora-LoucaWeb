@@ -52,10 +52,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <button type="submit">Cadastrar</button>
 
 </form>
-
 <br>
-
 <!-- Link para visualizar a lista de cadastrados -->
 <a href="tabelaclientes.php">clientes registrados</a>
+<br>
+<!-- Link para voltar ao painel -->
+<a href="painel.php">Voltar ao Painel</a>
 
 

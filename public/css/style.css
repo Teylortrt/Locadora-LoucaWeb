@@ -5,7 +5,7 @@
     --texto: #e8eaed;
     --texto-suave: #9aa0ad;
     --destaque: #e8b86d;
-    --destaque-hover: #f0c98a;
+    --destaque-hover: #ffe9c6;
     --erro: #e06c75;
     --sucesso: #7dcea0;
     --input: #12141c;
@@ -118,10 +118,32 @@ a {
     border: 1px solid var(--borda);
 }
 
-.botao-sair:hover {
+.botao-sair:hover { 
     background: var(--borda);
     color: var(--texto);
 }
+
+.acoes-topo {
+    flex: 0 0 auto;
+}
+
+.botao-cadastro {
+    width: auto;
+    background: #284d7e; /* cor do botão */
+    margin-top: 0;
+    padding: 8px 16px;
+    
+}
+
+.botao-cadastro:hover {
+    background: #2e57b1; /* cor ao passar o mouse */
+}
+
+.form-cadastro {
+    flex: 0 0 auto;
+    margin-right: auto;
+}
+
 
 .mensagem {
     display: none;
@@ -140,7 +162,8 @@ a {
 .topo {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 20px;
     padding: 16px 32px;
     background: var(--fundo-card);
     border-bottom: 1px solid var(--borda);
