@@ -1,8 +1,8 @@
 <?php
 // 1. Carrega a conexão (isso também inicia a sessão automaticamente)
 // 2. Carrega as classes
-require_once __DIR__ . '/../src/Auth.php';
-require_once __DIR__ . '/../src/Filmes.php';
+require_once __DIR__ . '/../src/Models/Auth.php';
+require_once __DIR__ . '/../src/Models/Filmes.php';
 
 // 3. Instancia as classes passando a variável $conn
 $auth = new Auth($conn);
