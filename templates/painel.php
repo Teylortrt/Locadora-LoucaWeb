@@ -22,6 +22,9 @@ $usuario = $auth->usuario();
         <form class="form-cadastro" method="GET" action="cadastro.php">
             <button type="submit" class="botao botao-cadastro">Cadastro</button>
         </form>
+        <form class="form-catalogo" method="GET" action="filmes.php">
+            <button type="submit" class="botao botao-catalogo">Catálogo</button>
+        </form>
         <div class="acoes-topo">
             <form class="form-sair" method="POST" action="../public/logout-web">
                 <button type="submit" class="botao botao-sair">Sair</button>

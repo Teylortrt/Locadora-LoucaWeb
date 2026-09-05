@@ -14,7 +14,7 @@ class Auth
             $this->db = $conn;
         } else {
             $this->db = new PDO(
-                'mysql:host=localhost;port=3312;dbname=locadora;charset=utf8mb4',
+                'mysql:host=localhost;port=3306;dbname=locadora;charset=utf8mb4',
                 'root',
                 '',
                 [
