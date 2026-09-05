@@ -16,15 +16,17 @@ $usuario = $auth->usuario();
 <body>
     <header class="topo">
         <div class="marca">
-            <span>Locadora</span>
             <h1>LoucaWeb</h1>
         </div>
+
         <form class="form-cadastro" method="GET" action="cadastro.php">
             <button type="submit" class="botao botao-cadastro">Cadastro</button>
         </form>
-        <form class="form-catalogo" method="GET" action="filmes.php">
+
+        <form class="form-catalogo" method="GET" action="/Locadora-LoucaWeb/templates/filmes/filmes.php">
             <button type="submit" class="botao botao-catalogo">Catálogo</button>
         </form>
+        
         <div class="acoes-topo">
             <form class="form-sair" method="POST" action="../public/logout-web">
                 <button type="submit" class="botao botao-sair">Sair</button>
