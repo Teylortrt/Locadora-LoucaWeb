@@ -1,37 +1,40 @@
 <?php
 
+// Carrega as dependências necessárias para autenticação e acesso aos filmes.
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../src/Filmes.php';
 
-//Instanciando conexao BD
+// Garante que somente usuários autenticados acessem o catálogo.
 $auth = new Auth($conn);
 $auth->exigirLogin();
 
 $filmeModel = new Filmes($conn);
 
-//variavel de conta de filmes
+// Obtém a quantidade total para calcular o número de páginas.
 $totalRegistros = $filmeModel->contarTotal();
 
-// 2. Configurações da Paginação
-$registrosPorPagina = 30; 
+// Usa uma string vazia quando não há pesquisa informada na URL.
+$filtrarFilmes = $filmeModel->filtrarFilmes($_GET['pesquisa'] ?? '');
 
-// Captura a página atual pela URL (se não existir, o padrão é 1)
+// Define quantos filmes serão exibidos por página.
+$registrosPorPagina = 10;
+
+// Converte o parâmetro da URL para inteiro e usa a primeira página como padrão.
 $paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
 if ($paginaAtual < 1) {
     $paginaAtual = 1;
 }
 
-// 3. Cálculo do Offset (Deslocamento)
+// Cálculo do Offset (Deslocamento)
 // Ex: Página 1 = (1 - 1) * 5 = 0 (Busca a partir do 0)
 // Ex: Página 2 = (2 - 1) * 5 = 5 (Busca a partir do 5)
 $offset = ($paginaAtual - 1) * $registrosPorPagina;
 
-
-// 5. Calcular o total de páginas (arredondando sempre para cima com ceil)
+// Arredonda para cima para incluir uma página com os registros restantes.
 $totalPaginas = ceil($totalRegistros / $registrosPorPagina);
 
-
-$filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset)
+// Busca apenas os filmes necessários para a página atual.
+$filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
 ?>
 
 <!DOCTYPE html>
@@ -70,17 +73,34 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset)
     <main class="conteudo">
         <h1>Catálogo</h1>
         
+        <div class="barra-pesquisa">
+            
+            <form method="GET" action="">
+                <input type="text" name="pesquisa" placeholder="Pesquisar por título..." value="<?= htmlspecialchars($_GET['pesquisa'] ?? '') ?>">
+                <button type="submit">Pesquisar</button>
+            </form>
+
+            <?php if (!empty($filtrarFilmes)): ?>
+                <div class="resultado-pesquisa">
+                    <h2>Resultados da pesquisa:</h2>
+                    <?php foreach ($filtrarFilmes as $filme): ?>
+                        <p><?= htmlspecialchars($filme['titulo']) ?> - R$ <?= htmlspecialchars($filme['valor']) ?></p>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+
         <!-- Listagem de Dados em Grid -->
         <div class="catalogo">
             <?php foreach ($filmes as $filme): ?>
                 
                 <div class="cartao-filme">
-                    <!-- Retângulo cinza representando onde ficaria a foto -->
+                    <!-- Área reservada para a imagem do filme. -->
                     <div class="poster-falso">
                         Sem Imagem
                     </div>
                     
-                    <!-- Dados do Banco -->
+                    <!-- Escapa os valores antes de inseri-los no HTML. -->
                     <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
                     <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
                 </div>
@@ -88,7 +108,7 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset)
             <?php endforeach; ?>
         </div>
 
-        <!-- Links de Paginação -->
+        <!-- Navegação entre as páginas do catálogo. -->
         <div class="paginacao">
             
             <!-- Botão Anterior -->

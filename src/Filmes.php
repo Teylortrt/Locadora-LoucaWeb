@@ -50,4 +50,19 @@ class Filmes
             'valor'     => $dados['valor']
         ]);
     }
+
+    // Método para pesquisar filmes por título na barra de pesquisa
+    public function filtrarFilmes(string $termo): array
+    {
+        if (empty(trim($termo))) {
+            return []; // Retorna uma lista vazia sem consultar o banco
+        }
+        $sql = "SELECT titulo, valor FROM filmes WHERE titulo LIKE :termo ORDER BY titulo LIMIT 10";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':termo', '%' . $termo . '%', PDO::PARAM_STR);
+        $stmt->execute();
+        
+        return $stmt->fetchAll();
+    }
+
 }
