@@ -1,8 +1,8 @@
 <?php
 
 // Carrega as dependências necessárias para autenticação e acesso aos filmes.
-require_once __DIR__ . '/../../src/Auth.php';
-require_once __DIR__ . '/../../src/Filmes.php';
+require_once __DIR__ . '/../../src/Models/Auth.php';
+require_once __DIR__ . '/../../src/Models/Filmes.php';
 
 // Garante que somente usuários autenticados acessem o catálogo.
 $auth = new Auth($conn);
