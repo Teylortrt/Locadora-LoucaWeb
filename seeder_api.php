@@ -19,7 +19,7 @@ class SeederFilmesAPI
 
     // Em produção, a chave deve vir de uma variável de ambiente ou de um cofre
     // de segredos, nunca ficar exposta diretamente no código-fonte.
-    private string $apiKey = 'SUA_CHAVE_TMDB';
+    private string $apiKey = '390178bbb0fef86f227fa45ee73403e0';
 
     public function __construct(PDO $conexao)
     {
@@ -54,6 +54,8 @@ class SeederFilmesAPI
             foreach ($dadosDaApi['results'] as $item) {
                 if ($dvdsGerados >= $metaDvds) break;
 
+                $elenco = $this->buscarElencoAPI((int) $item['id']);
+
                 // Converte o formato da API para os campos esperados pelo
                 // modelo e gera valores locais para preço e gênero.
                 $dadosFilme = [
@@ -62,12 +64,22 @@ class SeederFilmesAPI
                     'id_genero' => $generosValidos[array_rand($generosValidos)]
                 ];
 
-                $this->filmeModel->criar($dadosFilme);
-                $idFilmeInserido = $this->db->lastInsertId();
+                $this->db->beginTransaction();
 
-                // Cada filme recebe uma quantidade aleatória de cópias físicas.
-                $qtdEstoque = mt_rand(1, 5);
-                $this->inserirDvds((int)$idFilmeInserido, $qtdEstoque);
+                try {
+                    $this->filmeModel->criar($dadosFilme);
+                    $idFilmeInserido = (int) $this->db->lastInsertId();
+
+                    $this->inserirAtores((int) $idFilmeInserido, $elenco);
+
+                    // Cada filme recebe uma quantidade aleatória de cópias físicas.
+                    $qtdEstoque = mt_rand(1, 5);
+                    $this->inserirDvds((int) $idFilmeInserido, $qtdEstoque);
+                    $this->db->commit();
+                } catch (Throwable $erro) {
+                    $this->db->rollBack();
+                    throw $erro;
+                }
 
                 $dvdsGerados += $qtdEstoque;
             }
@@ -86,19 +98,69 @@ class SeederFilmesAPI
     {
         $url = "https://api.themoviedb.org/3/movie/popular?api_key={$this->apiKey}&language=pt-BR&page={$pagina}";
 
+        return $this->fazerRequisicaoAPI($url);
+    }
+
+    private function buscarElencoAPI(int $idFilmeAPI): array
+    {
+        $url = "https://api.themoviedb.org/3/movie/{$idFilmeAPI}/credits?api_key={$this->apiKey}&language=pt-BR";
+        $dados = $this->fazerRequisicaoAPI($url);
+
+        return array_slice($dados['cast'] ?? [], 0, 10);
+    }
+
+    private function fazerRequisicaoAPI(string $url): array
+    {
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         // A validação SSL deve permanecer habilitada em ambientes reais.
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 
         $resposta = curl_exec($ch);
+        if ($resposta === false) {
+            $erro = curl_error($ch);
+            curl_close($ch);
+            throw new RuntimeException("Erro ao consultar a API do TMDB: {$erro}");
+        }
         curl_close($ch);
 
         // Retorna uma lista vazia para que o chamador trate respostas inválidas
         // ou sem resultados sem tentar acessar índices inexistentes.
         return json_decode($resposta, true) ?: [];
+    }
+
+    private function inserirAtores(int $idFilme, array $elenco): void
+    {
+        $buscarAtor = $this->db->prepare('SELECT id FROM atores WHERE nome = :nome LIMIT 1');
+        $criarAtor = $this->db->prepare('INSERT INTO atores (nome) VALUES (:nome)');
+        $vincularAtor = $this->db->prepare(
+            'INSERT INTO atores_filme (id_filme, id_ator, personagem)
+             VALUES (:id_filme, :id_ator, :personagem)'
+        );
+
+        foreach ($elenco as $ator) {
+            $nome = trim((string) ($ator['name'] ?? ''));
+            if ($nome === '') {
+                continue;
+            }
+
+            $buscarAtor->execute(['nome' => substr($nome, 0, 100)]);
+            $idAtor = $buscarAtor->fetchColumn();
+
+            if ($idAtor === false) {
+                $criarAtor->execute(['nome' => substr($nome, 0, 100)]);
+                $idAtor = $this->db->lastInsertId();
+            }
+
+            $vincularAtor->execute([
+                'id_filme' => $idFilme,
+                'id_ator' => (int) $idAtor,
+                'personagem' => substr(trim((string) ($ator['character'] ?? '')), 0, 100) ?: 'Não informado'
+            ]);
+        }
     }
 
     private function inserirDvds(int $idFilme, int $quantidade): void

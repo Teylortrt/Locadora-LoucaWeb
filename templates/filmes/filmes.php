@@ -70,7 +70,7 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
 
     </header>
 
-    <main class="conteudo">
+    <main class="conteudo catalogo-pagina">
         <h1>Catálogo</h1>
         
         <div class="barra-pesquisa">
@@ -100,9 +100,11 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
                         Sem Imagem
                     </div>
                     
-                    <!-- Escapa os valores antes de inseri-los no HTML. -->
-                    <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
-                    <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
+                    <div class="detalhes-filme">
+                        <!-- Escapa os valores antes de inseri-los no HTML. -->
+                        <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
+                        <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
+                    </div>
                 </div>
 
             <?php endforeach; ?>
@@ -110,23 +112,40 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
 
         <!-- Navegação entre as páginas do catálogo. -->
         <div class="paginacao">
+
+            <!-- Botão para ir para a primeira página -->
+            <?php if ($paginaAtual > 1): ?>
+                <a href="?pagina=1">Primeira</a>
+            <?php endif; ?>
             
             <!-- Botão Anterior -->
             <?php if ($paginaAtual > 1): ?>
                 <a href="?pagina=<?= $paginaAtual - 1 ?>">Anterior</a>
             <?php endif; ?>
 
-            <!-- Números das Páginas -->
-            <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
-                <a href="?pagina=<?= $i ?>" class="<?= ($i == $paginaAtual) ? 'ativo' : '' ?>">
-                    <?= $i ?>
-                </a>
-            <?php endfor; ?>
+            <!-- Números das Páginas limitado para não ter excesso de links -->
+             <?php
+                $inicio = max(1, $paginaAtual - 6);
+                $fim = min($totalPaginas, $paginaAtual + 6);
+
+                for ($i = $inicio; $i <= $fim; $i++): ?>
+                    <a href="?pagina=<?= $i ?>" class="<?= ($i == $paginaAtual) ? 'ativo' : '' ?>">
+                        <?= $i ?>
+                    </a>
+                <?php endfor; ?>
+           
 
             <!-- Botão Próximo -->
             <?php if ($paginaAtual < $totalPaginas): ?>
                 <a href="?pagina=<?= $paginaAtual + 1 ?>">Próximo</a>
             <?php endif; ?>
+
+            <!-- Botão para ir para a última página -->
+            <?php if ($paginaAtual < $totalPaginas): ?>
+                <a href="?pagina=<?= $totalPaginas ?>">Última</a>
+            <?php endif; ?>
+
+            <p>Total de Páginas: <?= $totalPaginas ?></p>
 
         </div>
     </main>            

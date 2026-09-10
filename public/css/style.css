@@ -203,3 +203,75 @@ a {
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+
+/* Grade responsiva do catálogo e layout interno dos cartões. */
+.conteudo.catalogo-pagina {
+    max-width: 1200px;
+}
+
+.catalogo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 20px;
+    align-items: stretch;
+}
+
+.cartao-filme {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    background: var(--fundo-card);
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+}
+
+.poster-falso {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 2 / 3;
+    padding: 16px;
+    background: linear-gradient(145deg, #252a38, #12141c);
+    color: var(--texto-suave);
+    font-size: 13px;
+    text-align: center;
+}
+
+.detalhes-filme {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+}
+
+.detalhes-filme h3 {
+    color: var(--texto);
+    font-size: 16px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.detalhes-filme p {
+    margin-top: auto;
+    margin-bottom: 0;
+    color: var(--destaque);
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .conteudo.catalogo-pagina {
+        margin-top: 28px;
+        padding: 0 16px;
+    }
+
+    .catalogo {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .detalhes-filme {
+        padding: 12px;
+    }
+}
