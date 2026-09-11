@@ -18,17 +18,23 @@ $listaDeFilmes = $filmeModel->listarTodos();
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Lista de Filmes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filmes — Locadora LoucaWeb</title>
+    <link rel="stylesheet" href="../public/css/normalize.css">
+    <link rel="stylesheet" href="../public/css/skeleton.css">
+    <link rel="stylesheet" href="../public/css/style.css">
 </head>
 <body>
-    <h1>Catálogo de Filmes</h1>
-    
-    <ul>
-        <?php foreach ($listaDeFilmes as $filme): ?>
-            <li>
-                <?= htmlspecialchars($filme['titulo']) ?> - R$ <?= number_format($filme['valor'], 2, ',', '.') ?>
-            </li>
-        <?php endforeach; ?>
-    </ul>
+    <main class="container conteudo">
+        <header class="cabecalho-pagina"><h2>Catálogo de filmes</h2><p>Confira os títulos disponíveis na locadora.</p></header>
+        <section class="painel-card">
+            <table class="u-full-width"><thead><tr><th>Título</th><th>Valor</th></tr></thead><tbody>
+                <?php foreach ($listaDeFilmes as $filme): ?>
+                    <tr><td><?= htmlspecialchars($filme['titulo']) ?></td><td>R$ <?= number_format($filme['valor'], 2, ',', '.') ?></td></tr>
+                <?php endforeach; ?>
+            </tbody></table>
+        </section>
+        <nav class="navegacao"><a href="painel.php">Voltar ao painel</a></nav>
+    </main>
 </body>
 </html>

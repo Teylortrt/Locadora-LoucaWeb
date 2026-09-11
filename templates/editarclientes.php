@@ -35,24 +35,25 @@ $stmt->bindParam(':id', $id);
 $stmt->execute();
 $cliente = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>
-<!-- Front para editar cliente -->
- <h2>Editar Cliente</h2>
-
- <form method="POST">
-     Nome:<br>
-     <input type="text" name="nome" value="<?php echo htmlspecialchars($cliente['nome']); ?>" required><br><br>
-
-     Sobrenome:<br>
-     <input type="text" name="sobrenome" value="<?php echo htmlspecialchars($cliente['sobrenome']); ?>" required><br><br>
-
-     Telefone:<br>
-     <input type="text" name="telefone" value="<?php echo htmlspecialchars($cliente['telefone']); ?>" required><br><br>
-
-     Endereço:<br>
-     <input type="text" name="endereco" value="<?php echo htmlspecialchars($cliente['endereco']); ?>" required><br><br>
-
-     <button type="submit">Atualizar</button>
-    </form>
-    <br>
-    <!-- Link para voltar à lista de clientes -->
-     <a href="tabelaclientes.php">Voltar à Lista de Clientes</a>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar cliente — Locadora LoucaWeb</title>
+    <link rel="stylesheet" href="../public/css/normalize.css">
+    <link rel="stylesheet" href="../public/css/skeleton.css">
+    <link rel="stylesheet" href="../public/css/style.css">
+</head>
+<body>
+    <main class="container conteudo"><div class="row"><section class="eight columns offset-by-two painel-card">
+        <header class="cabecalho-pagina"><h2>Editar cliente</h2><p>Atualize as informações de cadastro.</p></header>
+        <form method="POST">
+            <div class="row"><div class="six columns"><label for="nome">Nome</label><input class="u-full-width" type="text" id="nome" name="nome" value="<?php echo htmlspecialchars($cliente['nome']); ?>" required></div><div class="six columns"><label for="sobrenome">Sobrenome</label><input class="u-full-width" type="text" id="sobrenome" name="sobrenome" value="<?php echo htmlspecialchars($cliente['sobrenome']); ?>" required></div></div>
+            <div class="row"><div class="six columns"><label for="telefone">Telefone</label><input class="u-full-width" type="text" id="telefone" name="telefone" value="<?php echo htmlspecialchars($cliente['telefone']); ?>" required></div><div class="six columns"><label for="endereco">Endereço</label><input class="u-full-width" type="text" id="endereco" name="endereco" value="<?php echo htmlspecialchars($cliente['endereco']); ?>" required></div></div>
+            <button type="submit" class="button-primary">Salvar alterações</button>
+        </form>
+        <nav class="navegacao"><a href="tabelaclientes.php">Voltar à lista de clientes</a></nav>
+    </section></div></main>
+</body>
+</html>
