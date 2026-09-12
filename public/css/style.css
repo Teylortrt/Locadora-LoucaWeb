@@ -225,7 +225,12 @@ a {
     border: 1px solid var(--borda);
     border-radius: 8px;
 }
-
+.poster-imagem{
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    display: block;
+}
 .poster-falso {
     display: flex;
     align-items: center;

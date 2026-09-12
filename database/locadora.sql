@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS `locadora`.`filmes` (
   `id_genero` INT NOT NULL,
   `titulo` VARCHAR(100) NOT NULL,
   `valor` DECIMAL(8,2) NOT NULL,
+  `poster_url` VARCHAR(255) DEFAULT NULL,
+
   PRIMARY KEY (`id`),
   INDEX `fk_filmes_1_idx` (`id_genero` ASC),
   CONSTRAINT `fk_filmes_1`
@@ -193,22 +195,6 @@ INSERT INTO `locadora`.`usuarios` (`nome`, `email`, `senha`, `perfil`) VALUES
 ('Admin Locadora', 'admin@locadora.com', '$2b$12$M0AT5foh8ayi6dRY9wl1R.Uz60fC8a0VeAgfA7E1bSYzRMcNfARY6', 'administrador'),
 ('Funcionario Teste', 'funcionario@locadora.com', '$2b$12$.StFPfly7WzQdhbv5S5r3.VPl4sP4IXbj/4YvxtLAO7L4nzYHfdgW', 'funcionario');
 
--- -----------------------------------------------------
--- Inserts `locadora`.`generos`
--- -----------------------------------------------------
-INSERT INTO `generos` (`id`, `genero`) VALUES
-(1, 'Ação'),
-(2, 'Comédia'),
-(3, 'Drama'),
-(4, 'Ficção Científica'),
-(5, 'Terror'),
-(6, 'Romance'),
-(7, 'Aventura'),
-(8, 'Documentário'),
-(9, 'Animação'),
-(10, 'Suspense'),
-(11, 'Fantasia'),
-(12, 'Mistério');
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

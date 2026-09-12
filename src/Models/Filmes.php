@@ -19,7 +19,7 @@ class Filmes
     }
 
     public function listarPorPagina(int $limit, int $offset): array    {
-        $sql = "SELECT titulo, valor FROM filmes LIMIT :limit OFFSET :offset";
+        $sql = "SELECT titulo, valor, poster_url FROM filmes LIMIT :limit OFFSET :offset";
         // BindValue com PARAM_INT é obrigatório para LIMIT/OFFSET no MySQL
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -41,13 +41,14 @@ class Filmes
     // MÉTODO OBRIGATÓRIO PARA INSERÇÃO DE DADOS
     public function criar(array $dados): bool
     {
-        $sql = "INSERT INTO filmes (id_genero, titulo, valor) VALUES (:id_genero, :titulo, :valor)";
+        $sql = "INSERT INTO filmes (id_genero, titulo, valor, poster_url) VALUES (:id_genero, :titulo, :valor, :poster_url)";
         $stmt = $this->db->prepare($sql);
         
         return $stmt->execute([
-            'id_genero' => $dados['id_genero'],
-            'titulo'    => $dados['titulo'],
-            'valor'     => $dados['valor']
+            'id_genero'  => $dados['id_genero'],
+            'titulo'     => $dados['titulo'],
+            'valor'      => $dados['valor'],
+            'poster_url' => $dados['poster_url'] ?? null
         ]);
     }
 
@@ -57,7 +58,7 @@ class Filmes
         if (empty(trim($termo))) {
             return []; // Retorna uma lista vazia sem consultar o banco
         }
-        $sql = "SELECT titulo, valor FROM filmes WHERE titulo LIKE :termo ORDER BY titulo LIMIT 10";
+        $sql = "SELECT titulo, valor, poster_url FROM filmes WHERE titulo LIKE :termo ORDER BY titulo LIMIT 10";
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':termo', '%' . $termo . '%', PDO::PARAM_STR);
         $stmt->execute();

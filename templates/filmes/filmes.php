@@ -17,7 +17,7 @@ $totalRegistros = $filmeModel->contarTotal();
 $filtrarFilmes = $filmeModel->filtrarFilmes($_GET['pesquisa'] ?? '');
 
 // Define quantos filmes serão exibidos por página.
-$registrosPorPagina = 10;
+$registrosPorPagina = 25;
 
 // Converte o parâmetro da URL para inteiro e usa a primeira página como padrão.
 $paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
@@ -95,10 +95,17 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
             <?php foreach ($filmes as $filme): ?>
                 
                 <div class="cartao-filme">
-                    <!-- Área reservada para a imagem do filme. -->
-                    <div class="poster-falso">
-                        Sem Imagem
-                    </div>
+                    <?php if (!empty($filme['poster_url'])):?>
+                        <img class="poster-imagem"
+                            src="<?= htmlspecialchars($filme['poster_url']) ?>"
+                            alt="Poster de <?= htmlspecialchars($filme['titulo']) ?>"
+                            loading="lazy">
+                    <?php else: ?>
+                        <div class="poster-falso">
+                            Sem Imagem
+                        </div>
+                    <?php endif;?>
+
                     
                     <div class="detalhes-filme">
                         <!-- Escapa os valores antes de inseri-los no HTML. -->
