@@ -1,29 +1,50 @@
-:root { --primary:#2563eb; --primary-dark:#1d4ed8; --ink:#172033; --muted:#637083; --line:#dde3ec; --surface:#fff; --canvas:#f5f7fb; --danger:#b42318; }
-* { box-sizing:border-box; }
-body { min-height:100vh; background:var(--canvas); color:var(--ink); }
-a { color:var(--primary); } a:hover { color:var(--primary-dark); }
-.topo { padding:1.6rem 0; background:var(--surface); border-bottom:1px solid var(--line); }
-.topo .container,.acoes-topo { display:flex; align-items:center; } .topo .container { gap:1.6rem; }
-.form-cadastro { margin-right:auto; } .form-cadastro,.form-sair { margin-bottom:0; }
-.marca { line-height:1.1; } .marca span { display:block; color:var(--primary); font-size:1.1rem; font-weight:700; letter-spacing:.14rem; text-transform:uppercase; }
-.marca h1 { margin:.3rem 0 0; font-size:2.1rem; font-weight:700; }
-.tela-central { display:flex; align-items:center; min-height:100vh; padding:2.4rem 0; }
-.card,.painel-card { background:var(--surface); border:1px solid var(--line); border-radius:.8rem; box-shadow:0 .6rem 2rem rgba(23,32,51,.07); }
-.card { padding:3.2rem; } .card .marca { margin-bottom:2.8rem; text-align:center; } .card .marca h1 { font-size:2.8rem; }
-.conteudo { padding:4.8rem 0; } .cabecalho-pagina { margin-bottom:2.8rem; } .cabecalho-pagina h2 { margin-bottom:.6rem; }
-.cabecalho-pagina p,.descricao { color:var(--muted); margin-bottom:0; } .painel-card { padding:2.4rem; }
-.perfil { display:inline-block; margin-bottom:1.2rem; padding:.4rem .9rem; border-radius:2rem; background:#e8f0ff; color:var(--primary-dark); font-size:1.1rem; font-weight:700; letter-spacing:.08rem; text-transform:uppercase; }
-label { color:var(--ink); font-weight:600; }
-input[type="email"],input[type="password"],input[type="text"] { border-color:#c9d2df; background:#fff; }
-input[type="email"]:focus,input[type="password"]:focus,input[type="text"]:focus { border-color:var(--primary); box-shadow:0 0 0 .3rem rgba(37,99,235,.12); }
-.button-primary,button.button-primary,input[type="submit"].button-primary { background-color:var(--primary); border-color:var(--primary); }
-.button-primary:hover,button.button-primary:hover,input[type="submit"].button-primary:hover,.button-primary:focus,button.button-primary:focus,input[type="submit"].button-primary:focus { background-color:var(--primary-dark); border-color:var(--primary-dark); }
-.botao-sair,.botao-cadastro { margin:0; }
-.acao-coluna { text-align:right; white-space:nowrap; }
-.form-excluir { display:inline; margin:0; }
-.botao-excluir { margin:0; color:var(--danger); border-color:#f0b8b3; }
-.botao-excluir:hover,.botao-excluir:focus { color:#fff; background:var(--danger); border-color:var(--danger); }
-.mensagem { margin:1.6rem 0 0; padding:1rem 1.2rem; border-left:.35rem solid var(--danger); background:#fef3f2; color:var(--danger); }
-.lista-registros { margin:0; list-style:none; } .lista-registros li { padding:1.4rem 1.6rem; border-bottom:1px solid var(--line); } .lista-registros li:last-child { border-bottom:0; }
-.navegacao { margin-top:2.4rem; }
-@media (max-width:549px) { .topo .container { flex-wrap:wrap; } .form-cadastro { order:3; width:100%; } .card { padding:2.4rem; } .conteudo { padding:3.2rem 0; } }
+/* Complementos de layout para o Skeleton. */
+body { background: #f7f7f7; }
+.tela-central { display: flex; align-items: center; min-height: 100vh; }
+.card, .painel-card { padding: 2.5rem; background: #fff; border: 1px solid #e1e1e1; border-radius: 4px; }
+.card { margin-bottom: 0; }
+.marca { margin-bottom: 2rem; }
+.marca span { display: block; color: #33c3f0; font-size: 1.1rem; font-weight: 600; letter-spacing: .12rem; text-transform: uppercase; }
+.marca h1 { margin: .2rem 0 0; font-size: 2.4rem; font-weight: 400; }
+.campo { margin-bottom: 1.5rem; }
+.topo { padding: 1.5rem 0; background: #fff; border-bottom: 1px solid #e1e1e1; }
+.topo .container, .acoes-topo { display: flex; align-items: center; gap: 1rem; }
+.topo .marca { margin: 0; }
+.topo .marca h1 { font-size: 2rem; }
+.form-cadastro, .form-catalogo, .form-sair, .form-excluir { margin-bottom: 0; }
+.form-cadastro { margin-left: auto; }
+.conteudo { padding-top: 4rem; padding-bottom: 4rem; }
+.cabecalho-pagina { margin-bottom: 2rem; }
+.cabecalho-pagina h2 { margin-bottom: .5rem; }
+.cabecalho-pagina p, .descricao { color: #777; }
+.perfil { display: inline-block; margin-bottom: 1rem; padding: .3rem .8rem; color: #555; background: #eee; border-radius: 1.2rem; font-size: 1.1rem; font-weight: 600; letter-spacing: .08rem; text-transform: uppercase; }
+.mensagem { margin-top: 1.5rem; padding: 1rem; color: #a94442; background: #f2dede; border-left: .3rem solid #a94442; }
+.acao-coluna { text-align: right; white-space: nowrap; }
+.botao-excluir { color: #a94442; border-color: #a94442; }
+.botao-excluir:hover, .botao-excluir:focus { color: #fff; background: #a94442; border-color: #a94442; }
+.navegacao { margin-top: 2rem; }
+
+/* Catálogo */
+.catalogo-pagina { max-width: 1200px; }
+.barra-pesquisa form { display: flex; gap: 1rem; margin-bottom: 2rem; }
+.barra-pesquisa input { flex: 1; margin-bottom: 0; }
+.catalogo { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 2rem; }
+.cartao-filme { overflow: hidden; background: #fff; border: 1px solid #e1e1e1; border-radius: 4px; }
+.poster-imagem, .poster-falso { display: block; width: 100%; aspect-ratio: 2 / 3; }
+.poster-imagem { object-fit: cover; }
+.poster-falso { display: grid; place-items: center; padding: 1.5rem; color: #777; background: #eee; text-align: center; }
+.detalhes-filme { padding: 1.5rem; }
+.detalhes-filme h3 { margin-bottom: 1rem; font-size: 1.8rem; }
+.detalhes-filme p { margin-bottom: 0; color: #555; font-weight: 600; }
+.paginacao { margin-top: 2rem; }
+.paginacao a { display: inline-block; margin: 0 .3rem .5rem 0; padding: 0 .8rem; border: 1px solid #d1d1d1; border-radius: 4px; line-height: 3.6rem; text-decoration: none; }
+.paginacao a.ativo { color: #fff; background: #33c3f0; border-color: #33c3f0; }
+
+@media (max-width: 549px) {
+    .topo .container { flex-wrap: wrap; }
+    .form-cadastro { margin-left: 0; }
+    .acoes-topo { width: 100%; }
+    .card, .painel-card { padding: 2rem; }
+    .barra-pesquisa form { align-items: stretch; flex-direction: column; }
+    .catalogo { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
+}

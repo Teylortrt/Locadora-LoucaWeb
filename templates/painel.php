@@ -19,12 +19,16 @@ $usuario = $auth->usuario();
     <header class="topo">
       <div class="container">
         <div class="marca">
-            <span>Locadora</span>
             <h1>LoucaWeb</h1>
         </div>
-        <form class="form-cadastro" method="GET" action="tabelaclientes.php">
-            <button type="submit" class="button button-primary botao-cadastro">Clientes</button>
+        <form class="form-cadastro" method="GET" action="cadastro.php">
+            <button type="submit" class="botao botao-cadastro">Cadastro</button>
         </form>
+
+        <form class="form-catalogo" method="GET" action="/Locadora-LoucaWeb/templates/filmes/filmes.php">
+            <button type="submit" class="botao botao-catalogo">Catálogo</button>
+        </form>
+        
         <div class="acoes-topo">
             <form class="form-sair" method="POST" action="../public/logout-web">
                 <button type="submit" class="button botao-sair">Sair</button>

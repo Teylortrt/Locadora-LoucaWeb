@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS `locadora`.`filmes` (
   `id_genero` INT NOT NULL,
   `titulo` VARCHAR(100) NOT NULL,
   `valor` DECIMAL(8,2) NOT NULL,
+  `poster_url` VARCHAR(255) DEFAULT NULL,
+
   PRIMARY KEY (`id`),
   INDEX `fk_filmes_1_idx` (`id_genero` ASC),
   CONSTRAINT `fk_filmes_1`

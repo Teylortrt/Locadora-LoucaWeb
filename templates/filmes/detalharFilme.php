@@ -1,8 +1,10 @@
+
+//Teste para ver se aparece o poster de um filme
 <?php
 // DADOS DA CONEXAO (PADRAO PARA O XAMPP)
 
-$host = "localhost";
-$port = "3307";
+$host = "127.0.0.1"; 
+$port = "3306";      
 $dbname = "locadora";
 $user = "root";
 $password = "";
@@ -18,4 +20,13 @@ $conn = new PDO(
         PDO::ATTR_EMULATE_PREPARES   => false,
     ]
 );
+
+//Teste para ver se aparece o poster de um filme
+$stmt = $conn->query("SELECT poster_url FROM filmes WHERE id = 1");
+$filme = $stmt->fetch();
+if ($filme && !empty($filme['poster_url'])) {
+    echo '<img src="' . htmlspecialchars($filme['poster_url']) . '" alt="Poster do Filme" loading="lazy">';
+} else {
+    echo '<div class="poster-falso">Sem Imagem</div>';
+}
 ?>
