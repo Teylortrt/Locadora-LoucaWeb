@@ -14,6 +14,10 @@ body { background: #f7f7f7; }
 .form-cadastro, .form-catalogo, .form-sair, .form-excluir { margin-bottom: 0; }
 .form-cadastro { margin-left: auto; }
 .conteudo { padding-top: 4rem; padding-bottom: 4rem; }
+.cadastrar-filme .card { max-width: 100%; }
+.cadastrar-filme h2 { margin-bottom: 2.5rem; }
+.cadastrar-filme form { margin-bottom: 0; }
+.cadastrar-filme .button-primary { margin-top: 1rem; }
 .cabecalho-pagina { margin-bottom: 2rem; }
 .cabecalho-pagina h2 { margin-bottom: .5rem; }
 .cabecalho-pagina p, .descricao { color: #777; }

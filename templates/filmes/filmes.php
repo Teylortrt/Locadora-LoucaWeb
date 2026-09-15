@@ -56,7 +56,7 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
         </div>
 
         <div class="acoes-topo">
-            <form class="acoes-topo" method="GET" action="create.php">
+            <form class="acoes-topo" method="GET" action="cadastrarFilme.php">
                 <button type="submit" class="button button-primary">Adicionar Filmes</button>
             </form>
 
