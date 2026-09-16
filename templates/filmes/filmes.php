@@ -55,15 +55,15 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
             <h1>LoucaWeb</h1>
         </div>
 
-        <div class="acoes-topo">
-            <form class="acoes-topo" method="GET" action="cadastrarFilme.php">
+    
+            <form class="form-cadastro" method="GET" action="cadastrarFilme.php">
                 <button type="submit" class="button button-primary">Adicionar Filmes</button>
             </form>
 
-            <form class="acoes-topo" method="GET" action="../painel.php">
+            <form class="form-sair" method="GET" action="../painel.php">
                 <button type="submit" class="button">Voltar</button>
             </form>
-        </div>
+
 
         </div>
     </header>
@@ -82,7 +82,10 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
                 <div class="resultado-pesquisa">
                     <h2>Resultados da pesquisa:</h2>
                     <?php foreach ($filtrarFilmes as $filme): ?>
-                        <p><?= htmlspecialchars($filme['titulo']) ?> - R$ <?= htmlspecialchars($filme['valor']) ?></p>
+                        <img class="poster-imagem"
+                            src="<?= htmlspecialchars($filme['poster_url']) ?>"
+                            alt="Poster de <?= htmlspecialchars($filme['titulo']) ?>"
+                            loading="lazy">
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>

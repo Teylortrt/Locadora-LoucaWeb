@@ -5,6 +5,7 @@
  * Este script deve ser executado em um ambiente de desenvolvimento ou em uma
  * operação controlada de carga inicial, pois cria registros no banco de dados.
  */
+require_once __DIR__ . '/config/env.php';
 require_once __DIR__ . '/config/conexao.php';
 require_once __DIR__ . '/src/Models/Filmes.php';
 
@@ -19,12 +20,17 @@ class SeederFilmesAPI
 
     // Em produção, a chave deve vir de uma variável de ambiente ou de um cofre
     // de segredos, nunca ficar exposta diretamente no código-fonte.
-    private string $apiKey = '390178bbb0fef86f227fa45ee73403e0';
+    private string $apiKey;
 
     public function __construct(PDO $conexao)
     {
         $this->db = $conexao;
         $this->filmeModel = new Filmes($conexao);
+        $this->apiKey = $_ENV['TMDB_API_KEY'] ?? '';
+
+        if (empty($this->apiKey)) {
+            throw new Exception("Chave da API do TMDb não encontrada. Verifique o arquivo .env.");
+        }
     }
 
     public function popular(int $metaDvds = 2000): void
