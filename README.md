@@ -1,82 +1,154 @@
-# 🎬 Locadora LoucaWeb - Backend API
+# Locadora LoucaWeb
 
-Sistema de gerenciamento de locadora de DVDs desenvolvido em **PHP Puro** (sem frameworks) com arquitetura REST API.
+Sistema web de gerenciamento de uma locadora de filmes, desenvolvido em PHP puro com foco em autenticação, catálogo de filmes e interface administrativa.
 
-## 📁 Estrutura do Projeto
+## Visão geral
 
-```
-locadora-backend/
-│
-├── public/                      # Ponto de entrada público do servidor web
-│   ├── index.php                # Front Controller — recebe e roteia requisições
-│   └── .htaccess                # Redirecionamento de URLs (Apache)
-│
-├── src/                         # Código-fonte da aplicação
-│   ├── Controllers/             # Lógica de negócio e respostas às requisições
-│   ├── Models/                  # Representação das tabelas do banco
-│   ├── Services/                # Regras complexas (API externa, cálculo de multa)
-│   └── Database/
-│       └── Connection.php       # Conexão PDO Singleton com o schema `locadora`
-│
+A aplicação combina:
+
+- autenticação de usuários via sessão;
+- painel administrativo para navegação do sistema;
+- catálogo de filmes em interface web;
+- estrutura de backend para operações em PHP;
+- banco de dados relacional para armazenar filmes, clientes, usuários e movimentações da locadora.
+
+O projeto foi pensado para funcionar em ambiente local com XAMPP/LAMP e utiliza PDO para acesso ao MySQL.
+
+## Tecnologias
+
+- PHP 8+
+- MySQL / MariaDB
+- HTML, CSS e JavaScript simples
+- PDO para conexão e consultas ao banco
+- Arquitetura em camadas com Models, Controllers e templates
+
+## Funcionalidades
+
+- Login e logout de usuários
+- Proteção de páginas por autenticação
+- Cadastro e gerenciamento de clientes
+- Visualização de catálogo de filmes
+- Estrutura de banco para filmes, gêneros, atores, DVDs e empréstimos
+- Endpoints de API para acesso aos dados em JSON
+
+## Estrutura do projeto
+
+```text
+Locadora-LoucaWeb/
 ├── config/
-│   └── database.php             # Credenciais e configuração do banco
-│
+│   ├── conexao.php
+│   └── env.php
 ├── database/
-│   └── locadora.sql             # Script DDL do banco de dados
-│
-└── README.md                    # Este arquivo
+│   └── locadora.sql
+├── image/
+├── public/
+│   ├── css/
+│   ├── index.php
+│   └── ...
+├── src/
+│   ├── Controllers/
+│   ├── Models/
+│   ├── Services/
+│   └── Database/
+├── templates/
+│   ├── cadastro.php
+│   ├── editarclientes.php
+│   ├── login.php
+│   ├── painel.php
+│   ├── tabelaclientes.php
+│   └── filmes/
+├── README.md
+├── seeder_api.php
+└── ...
 ```
 
-## 🚀 Como Rodar
+## Requisitos
 
-### 1. Requisitos
-- PHP 8.0+
+- PHP 8 ou superior
 - MySQL/MariaDB
-- Apache com `mod_rewrite` habilitado (XAMPP/LAMP)
+- Servidor web Apache (XAMPP/LAMP recomendado)
+- Extensão PDO habilitada para MySQL
 
-### 2. Instalação
+## Configuração do ambiente
+
+### 1. Clone ou baixe o projeto
+
 ```bash
-# Clone ou baixe o repositório
-cd /opt/lampp/htdocs/Locadora-LoucaWeb
+cd /opt/lampp/htdocs
+git clone <url-do-repositorio>
+cd Locadora-LoucaWeb
+```
 
-# Importe o banco de dados
+### 2. Crie o banco de dados
+
+No phpMyAdmin ou via terminal, importe o script:
+
+```bash
 mysql -u root -p < database/locadora.sql
-
-# Configure as credenciais do banco
-# Edite: config/database.php
 ```
 
-### 3. Acessar a API
-```
+Se necessário, ajuste as credenciais de conexão no arquivo:
+
+- config/conexao.php
+
+Verifique também se o banco, usuário, senha e porta do MySQL coincidem com o ambiente local.
+
+### 3. Inicie o servidor local
+
+Acesse a pasta do projeto no navegador em:
+
+```text
 http://localhost/Locadora-LoucaWeb/public/
 ```
 
-## 🔗 Endpoints Disponíveis
+A página inicial do sistema redireciona para a tela de login.
 
-| Método | Endpoint    | Descrição              | Status |
-|--------|-------------|------------------------|--------|
-| GET    | `/`         | Status da API          | ✅     |
-| GET    | `/filmes`   | Listar todos os filmes | ✅     |
+## Acesso ao sistema
 
-## 🏗️ Decisões de Modelagem
+A aplicação possui fluxo web com autenticação por sessão. A partir da tela de login, o usuário pode acessar:
 
-### Banco de Dados
-- Schema: `locadora`
-- Tabelas: `filmes`, `generos`, `clientes`, `atores`, `dvds`, `emprestimos`, `devolucoes`
-- Relacionamentos N:N implementados via tabelas pivot
+- painel administrativo;
+- catálogo de filmes;
+- cadastro de clientes;
+- navegação pelas páginas do sistema.
 
-### Arquitetura
-- **Padrão Singleton** para conexão do banco
-- **PSR-4 Autoloading** manual (sem Composer)
-- **Front Controller Pattern** centralizando requisições
-- **API REST** retornando apenas JSON
+## API
 
-### Segurança
-- Uso de **PDO com Prepared Statements**
-- Headers CORS configurados
-- Tratamento de erros com status HTTP apropriados
+O projeto também expõe rotas simples em PHP para consulta de dados em JSON.
+
+### Exemplos
+
+```text
+GET /Locadora-LoucaWeb/public/filmes
+POST /Locadora-LoucaWeb/public/login
+POST /Locadora-LoucaWeb/public/cadastrar
+```
+
+A rota `/filmes` retorna a listagem de filmes em formato JSON.
+
+## Banco de dados
+
+O schema principal é `locadora`, com entidades como:
+
+- filmes
+- generos
+- clientes
+- atores
+- dvds
+- emprestimos
+- devolucoes
+- usuarios
+
+O script SQL em `database/locadora.sql` cria a estrutura e também insere usuários iniciais para uso no sistema.
+
+## Observações
+
+- O projeto foi desenvolvido em PHP puro, sem framework.
+- A organização está em torno de classes de domínio e controllers.
+- O acesso às páginas internas usa autenticação por sessão.
+
+## Licença
+
+Projeto desenvolvido para fins acadêmicos e de estudo.
 
 ---
-
-**Desenvolvido para fins educacionais**  
-Disciplina: Banco de Dados & Desenvolvimento Backend
