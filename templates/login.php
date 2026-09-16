@@ -16,6 +16,7 @@ $erro = isset($_GET['erro']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login — Locadora LoucaWeb</title>
+    <link rel="icon" href="../image/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../public/css/normalize.css">
     <link rel="stylesheet" href="../public/css/skeleton.css">
     <link rel="stylesheet" href="../public/css/style.css">
@@ -31,12 +32,12 @@ $erro = isset($_GET['erro']);
 
             <div>
                 <label for="email">E-mail</label>
-                <input type="email" id="email" name="email" required autocomplete="username">
+                <input class="u-full-width" type="email" id="email" name="email" required autocomplete="username">
             </div>
 
             <div>
                 <label for="senha">Senha</label>
-                <input type="password" id="senha" name="senha" required autocomplete="current-password">
+                <input class="u-full-width" type="password" id="senha" name="senha" required autocomplete="current-password">
             </div>
 
             <button type="submit" class="button-primary u-full-width">Entrar</button>

@@ -46,6 +46,7 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
 <head>
     <meta charset="UTF-8">
     <title>catalogo</title>
+    <link rel="icon" href="../../image/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../../public/css/normalize.css">
     <link rel="stylesheet" href="../../public/css/skeleton.css">
     <link rel="stylesheet" href="../../public/css/style.css?v=<?= filemtime(__DIR__ . '/../../public/css/style.css') ?>">
@@ -59,15 +60,15 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
             <h1>LoucaWeb</h1>
         </div>
 
-        <div class="acoes-topo">
-            <form class="acoes-topo" method="GET" action="cadastrarFilme.php">
+    
+            <form class="form-cadastro" method="GET" action="cadastrarFilme.php">
                 <button type="submit" class="button button-primary">Adicionar Filmes</button>
             </form>
 
-            <form class="acoes-topo" method="GET" action="../painel.php">
+            <form class="form-sair" method="GET" action="../painel.php">
                 <button type="submit" class="button">Voltar</button>
             </form>
-        </div>
+
 
         </div>
     </header>
