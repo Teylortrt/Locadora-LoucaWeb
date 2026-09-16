@@ -55,12 +55,12 @@ body { background: #f7f7f7; }
 
 
 /* Cadastro de Filmes */
-        .paginacao { margin-top: 20px; }
-        .paginacao a { padding: 5px 10px; border: 1px solid #ccc; text-decoration: none; color: #333; margin-right: 5px;}
-        .paginacao a.ativo { background-color: #007BFF; color: white; border-color: #007BFF; }
-        
-        /* CSS extra para alinhar os resultados da pesquisa */
-        .resultado-pesquisa { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; }
-        .resultado-item { width: 150px; text-align: center; }
-        .resultado-item img { max-width: 100%; border-radius: 5px; }
-        .resultado-item p { font-size: 14px; margin: 5px 0; font-weight: bold; }
+    .paginacao { margin-top: 20px; }
+    .paginacao a { padding: 5px 10px; border: 1px solid #ccc; text-decoration: none; color: #333; margin-right: 5px;}
+    .paginacao a.ativo { background-color: #007BFF; color: white; border-color: #007BFF; }
+    
+    /* CSS extra para alinhar os resultados da pesquisa */
+    .resultado-pesquisa { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; }
+    .resultado-item { width: 150px; text-align: center; }
+    .resultado-item img { max-width: 100%; border-radius: 5px; }
+    .resultado-item p { font-size: 14px; margin: 5px 0; font-weight: bold; }

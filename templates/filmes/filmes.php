@@ -42,6 +42,7 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
 <head>
     <meta charset="UTF-8">
     <title>catalogo</title>
+    <link rel="icon" href="../../image/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../../public/css/normalize.css">
     <link rel="stylesheet" href="../../public/css/skeleton.css">
     <link rel="stylesheet" href="../../public/css/style.css?v=<?= filemtime(__DIR__ . '/../../public/css/style.css') ?>">
