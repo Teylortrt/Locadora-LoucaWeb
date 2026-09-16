@@ -2,8 +2,8 @@
 require_once __DIR__ . '/../src/Models/Auth.php';
 require_once __DIR__ . '/../src/Models/cliente.php';
 require_once __DIR__ . '/../src/Controllers/ClienteController.php';
-// 3. Instancia as classes passando a variável $conn
-$auth = new Auth($conn);
+// 3. Instancia a autenticação usando a conexão carregada pelo modelo
+$auth = new Auth();
 $auth->exigirLogin();
 
 $clienteModel = new Cliente($conn);

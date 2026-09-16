@@ -32,7 +32,8 @@ body { background: #f7f7f7; }
 .catalogo-pagina { max-width: 1200px; }
 .barra-pesquisa form { display: flex; gap: 1rem; margin-bottom: 2rem; }
 .barra-pesquisa input { flex: 1; margin-bottom: 0; }
-.catalogo { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 2rem; }
+.catalogo, .resultado-pesquisa { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 2rem; }
+.resultado-pesquisa h2 { grid-column: 1 / -1; margin-bottom: 0; }
 .cartao-filme { overflow: hidden; background: #fff; border: 1px solid #e1e1e1; border-radius: 4px; }
 .poster-imagem, .poster-falso { display: block; width: 100%; aspect-ratio: 2 / 3; }
 .poster-imagem { object-fit: cover; }
@@ -50,5 +51,5 @@ body { background: #f7f7f7; }
     .acoes-topo { width: 100%; }
     .card, .painel-card { padding: 2rem; }
     .barra-pesquisa form { align-items: stretch; flex-direction: column; }
-    .catalogo { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
+    .catalogo, .resultado-pesquisa { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
 }

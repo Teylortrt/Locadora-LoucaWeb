@@ -54,8 +54,12 @@ spl_autoload_register(function ($classe) {
 });
 
 if ($method === 'GET' && $caminho === '/filmes') {
-    $controller = new \App\Controllers\FilmeController();
-    $controller->index();
+    require_once __DIR__ . '/../config/conexao.php';
+    require_once __DIR__ . '/../src/Models/Filmes.php';
+
+    $filmes = new Filmes($conn);
+
+    echo json_encode($filmes->listarTodos(), JSON_UNESCAPED_UNICODE);
     exit;
 }
 
