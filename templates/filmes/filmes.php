@@ -120,8 +120,6 @@ if ($genero !== '') {
 
     <!-- ---------- 8.1: RESULTADO FILTRADO POR GÊNERO ---------- -->
     <div class="resultado-pesquisa">
-        <h2>Gênero: <?= htmlspecialchars($genero) ?></h2>
-
         <?php if (!empty($filtrarPorGenero)): ?>
             <div class="catalogo">
                 <?php foreach ($filtrarPorGenero as $filme): ?>
