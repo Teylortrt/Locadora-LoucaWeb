@@ -110,34 +110,7 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
                     <?php else: ?>
                         <p>Nenhum filme encontrado.</p>
                     <?php endif; ?>
-
-                    <?php if ($totalPaginas > 1): ?>
-                    <div class="paginacao">
-                    <?php if ($paginaAtual > 1): ?>
-                        <a href="?pagina=1<?= $parametroPesquisa ?>">Primeira</a>
-                        <a href="?pagina=<?= $paginaAtual - 1 ?><?= $parametroPesquisa ?>">Anterior</a>
-                    <?php endif; ?>
-
-                    <?php
-                    $inicio = max(1, $paginaAtual - 6);
-                    $fim = min($totalPaginas, $paginaAtual + 6);
-
-                    for ($i = $inicio; $i <= $fim; $i++): ?>
-                        <a href="?pagina=<?= $i ?><?= $parametroPesquisa ?>" class="<?= ($i == $paginaAtual) ? 'ativo' : '' ?>">
-                            <?= $i ?>
-                        </a>
-                    <?php endfor; ?>
-
-                    <?php if ($paginaAtual < $totalPaginas): ?>
-                        <a href="?pagina=<?= $paginaAtual + 1 ?><?= $parametroPesquisa ?>">Próximo</a>
-                        <a href="?pagina=<?= $totalPaginas ?><?= $parametroPesquisa ?>">Última</a>
-                    <?php endif; ?>
-
-                    <p>Total de Páginas: <?= $totalPaginas ?></p>
-                    </div>
-                    <?php endif; ?>
                 </div>
-                
         <!-- Se não houver pesquisa, exibe o catálogo completo -->
             <?php else: ?>
                 <!-- Listagem de Dados em Grid -->
