@@ -8,8 +8,9 @@ class TmdbClient
 
     public function __construct()
     {
-        // A chave da API é lida do arquivo .env
-        $this->apiKey = $_ENV['TMDB_API_KEY'] ?? '';
+        // A chave da API é lida do arquivo .env (injetada em $_ENV pelo env.php)
+        // ou de uma variável de ambiente real do servidor.
+        $this->apiKey = $_ENV['TMDB_API_KEY'] ?? getenv('TMDB_API_KEY') ?? '';
         
         if (empty($this->apiKey)) {
             throw new Exception("Chave da API do TMDb não encontrada. Verifique o arquivo .env.");

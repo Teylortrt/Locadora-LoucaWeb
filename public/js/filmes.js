@@ -38,8 +38,10 @@
             + '<div class="modal-infos">'
             + '<h2>' + esc(f.titulo) + '</h2>'
             + '<p class="modal-genero">Gênero: ' + esc(f.genero) + '</p>'
-            + '<p class="modal-valor">' + valor + '</p>' + badge + '<hr>'
+            + '<p class="modal-valor">' + valor + '</p>' + badge + '<hr>' + '<br/>'
+            + '<div class="twelve columns">'
             + '<h3>Sinopse</h3>' + sinopse
+            + '</div>'
             + '<h3>Elenco</h3>' + atores
             + '</div>';
     }
@@ -59,13 +61,14 @@
 
             // Pega o ID do filme do atributo data-filme-id, codifica para URL.
             var id = encodeURIComponent(this.dataset.filmeId);
+            var url = window.location.origin + raiz + '/public/filmes/' + id;
 
             // Abre o modal e mostra mensagem de carregamento.
             modal.hidden = false;
             corpo.innerHTML = '<p>Carregando...</p>';
 
             // Faz a requisição para buscar os detalhes do filme.
-            fetch(raiz + '/public/filmes/' + id)
+            fetch(url)
                 .then(function (res) {
                     if (!res.ok) throw new Error('HTTP ' + res.status);
                     return res.json();

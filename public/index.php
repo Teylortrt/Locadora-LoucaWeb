@@ -1,6 +1,9 @@
 <?php
 // Front Controller — GET / redireciona para o login; demais rotas são a API JSON
 
+// Carrega as variáveis de ambiente (.env) usadas por services como o TmdbClient.
+require_once __DIR__ . '/../config/env.php';
+
 // Normaliza os caminhos antes de compará-los. No Windows o Apache pode
 // informar DOCUMENT_ROOT com barras diferentes das usadas pelo PHP.
 $diretorioProjeto = str_replace('\\', '/', dirname(__DIR__));
