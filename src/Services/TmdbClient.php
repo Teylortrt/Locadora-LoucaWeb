@@ -18,7 +18,7 @@ class TmdbClient
 
     public function buscarFilmePorTitulo(string $titulo): ?array
     {
-        $url = "{$this->baseUrl}/search/movie?api_key={$this->apiKey}&query=" . urlencode($titulo);
+        $url = "{$this->baseUrl}/search/movie?api_key={$this->apiKey}&language=pt-BR&query=" . urlencode($titulo);
         $response = file_get_contents($url);
         
         if ($response === false) {
