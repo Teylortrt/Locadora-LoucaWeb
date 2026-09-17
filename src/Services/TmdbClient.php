@@ -6,7 +6,6 @@ class TmdbClient
     private string $apiKey;
     private string $baseUrl = 'https://api.themoviedb.org/3';
 
-    // O construtor não pede mais parâmetros
     public function __construct()
     {
         // A chave da API é lida do arquivo .env
@@ -30,4 +29,15 @@ class TmdbClient
         return $data['results'] ?? null;
     }
 
+    public function buscarSinopse(string $titulo): ?string
+    {
+        $filmes = $this->buscarFilmePorTitulo($titulo);
+        
+        if (empty($filmes)) {
+            return null;
+        }
+
+        // Retorna a sinopse do primeiro filme encontrado
+        return $filmes[0]['overview'] ?? null;
+    }
 }
