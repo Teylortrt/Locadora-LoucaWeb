@@ -1,44 +1,68 @@
 <?php
-require_once __DIR__ . '/../../config/env.php'; // Carrega as variáveis de ambiente do arquivo .env
-// Carrega as dependências necessárias para autenticação e acesso aos filmes.
+require_once __DIR__ . '/../../config/env.php';
+require_once __DIR__ . '/../../config/conexao.php';
+
 require_once __DIR__ . '/../../src/Models/Auth.php';
 require_once __DIR__ . '/../../src/Models/Filmes.php';
 require_once __DIR__ . '/../../src/Models/Generos.php';
 require_once __DIR__ . '/../../src/Controllers/FilmeController.php';
+require_once __DIR__ . '/../../src/Controllers/DvdController.php';
 require_once __DIR__ . '/../../src/Services/TmdbClient.php';
 
-// Garante que somente usuários autenticados acessem o catálogo.
+// Exige autenticação
 $auth = new Auth();
 $auth->exigirLogin();
 
-// Generos Models
-$generosModel = new Generos($conn);
+// Garante que $conn existe antes de instanciar os Models/Controllers
+if (!isset($conn) || !($conn instanceof PDO)) {
+    die("Erro grave: Conexão com o banco de dados não foi estabelecida.");
+}
+
+// Instâncias dos Controllers e Models
+$dvdController   = new DVDController($conn);
+$generosModel    = new Generos($conn);
+$filmeController = new FilmesController($conn);
+$tmdbClient      = new TmdbClient();
+
+// Dados para preencher os selects
 $listarGeneros = $generosModel->listarGeneros();
 
-// Filme Models e Controller
-$filmeModel = new Filmes($conn);
-$filmeController = new FilmesController($conn);
-
-// TMBD CLIENT
-$tmdbClient = new TmdbClient();
-
-// Inicia as variáveis para evitar erro de "undefined variable"
+// Variáveis de estado da tela
 $filmesEncontrados = null;
-$adicionarFilme = null; 
+$mensagemSucesso   = false;
+$mensagemErro      = null;
 
-// Só executa se for um envio de formulário (POST)
+// Processa o formulário via POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    // Verifica se o formulário de PESQUISA foi enviado
+    // 1. Ação de PESQUISAR no TMDb
     if (isset($_POST['btn_pesquisar']) && !empty($_POST['titulo_pesquisa'])) {
         $filmesEncontrados = $tmdbClient->buscarFilmePorTitulo($_POST['titulo_pesquisa']);
     }
     
-    // Verifica se o formulário de ADICIONAR FILME foi enviado
+    // 2. Ação de ADICIONAR FILME + DVD
     if (isset($_POST['btn_adicionar'])) {
-        $adicionarFilme = $filmeController->adicionarFilme($_POST);
+        try {
+            $conn->beginTransaction();
+
+            $idFilme = $filmeController->salvar($_POST);
+            $quantidade = (int) ($_POST['dvd'] ?? 0);
+
+            $dvdController->inserirDVD($idFilme, $quantidade);
+
+            $conn->commit();
+            $mensagemSucesso = true;
+
+        } catch (Exception $e) {
+            if ($conn->inTransaction()) {
+                $conn->rollBack();
+            }
+            $mensagemErro = "Erro ao cadastrar: " . $e->getMessage();
+        }
     }
 }
+?>
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -145,10 +169,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label for="valor">Valor (R$)</label>
                         <input class="u-full-width" type="number" step="0.01" id="valor" name="valor" required>
 
+                        <label for="dvd">Quantidade de Cópias</label>
+                        <input class="u-full-width" type="number" step="1" min="0" id="dvd" name="dvd" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+
                         <button class="button-primary" type="submit" name="btn_adicionar">Salvar Filme</button>
                         
-                        <?php if (isset($adicionarFilme)): ?>
-                            <p class="mensagem sucesso" style="color: green; margin-top:10px;">Filme adicionado com sucesso!</p>
+                        <?php if ($mensagemSucesso): ?>
+                            <p class="mensagem sucesso" style="color: green; margin-top:10px;">Filme e estoque gravados com sucesso!</p>
+                        <?php endif; ?>
+
+                        <?php if ($mensagemErro): ?>
+                            <p class="mensagem erro" style="color: red; margin-top:10px;"><?= htmlspecialchars($mensagemErro) ?></p>
                         <?php endif; ?>
                     </form>
                 </div>
