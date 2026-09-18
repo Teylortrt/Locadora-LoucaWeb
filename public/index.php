@@ -1,6 +1,9 @@
 <?php
 // Front Controller — GET / redireciona para o login; demais rotas são a API JSON
 
+// Carrega as variáveis de ambiente (.env) usadas por services como o TmdbClient.
+require_once __DIR__ . '/../config/env.php';
+
 // Normaliza os caminhos antes de compará-los. No Windows o Apache pode
 // informar DOCUMENT_ROOT com barras diferentes das usadas pelo PHP.
 $diretorioProjeto = str_replace('\\', '/', dirname(__DIR__));
@@ -60,6 +63,39 @@ if ($method === 'GET' && $caminho === '/filmes') {
     $filmes = new Filmes($conn);
 
     echo json_encode($filmes->listarTodos(), JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if ($method === 'GET' && preg_match('#^/filmes/(\d+)$#', $caminho, $matches)) {
+    require_once __DIR__ . '/../config/conexao.php';
+    require_once __DIR__ . '/../src/Models/Filmes.php';
+    require_once __DIR__ . '/../src/Models/Dvd.php';
+    require_once __DIR__ . '/../src/Services/TmdbClient.php';
+
+    $filmeModel = new Filmes($conn);
+    $filme = $filmeModel->buscarPorId((int) $matches[1]);
+
+    if (!$filme) {
+        http_response_code(404);
+        echo json_encode(["erro" => "Filme não encontrado"], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    // Sinopse ao vivo: falha silenciosa -> null
+    $sinopse = null;
+    try {
+        $sinopse = (new TmdbClient())->buscarSinopse($filme['titulo']);
+    } catch (Throwable $e) {
+        $sinopse = null;
+    }
+
+    $dvdModel = new Dvd($conn);
+
+    $filme['sinopse']        = $sinopse;
+    $filme['atores']         = $filmeModel->listarAtores((int) $filme['id']);
+    $filme['disponibilidade']= $dvdModel->verificarDisponibilidade((int) $filme['id']);
+
+    echo json_encode($filme, JSON_UNESCAPED_UNICODE);
     exit;
 }
 

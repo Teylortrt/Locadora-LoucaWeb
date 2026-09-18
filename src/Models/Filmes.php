@@ -20,7 +20,7 @@ class Filmes
 
     public function listarPorPagina(int $limit, int $offset): array
     {
-        $sql = "SELECT titulo, valor, poster_url FROM filmes LIMIT :limit OFFSET :offset";
+        $sql = "SELECT id, titulo, valor, poster_url FROM filmes LIMIT :limit OFFSET :offset";
         // BindValue com PARAM_INT é obrigatório para LIMIT/OFFSET no MySQL
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -59,7 +59,7 @@ class Filmes
         if (empty(trim($termo))) {
             return []; // Retorna uma lista vazia sem consultar o banco
         }
-        $sql = "SELECT titulo, valor, poster_url FROM filmes WHERE titulo LIKE :termo ORDER BY titulo LIMIT 10";
+        $sql = "SELECT id, titulo, valor, poster_url FROM filmes WHERE titulo LIKE :termo ORDER BY titulo LIMIT 10";
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':termo', '%' . $termo . '%', PDO::PARAM_STR);
         $stmt->execute();
@@ -81,14 +81,42 @@ class Filmes
     // Busca os filmes de um gênero específico, já com paginação (igual listarPorPagina)
     public function filtrarPorGenero(int $genero, int $limit, int $offset): array
     {
-        $sql = "SELECT titulo, valor, poster_url FROM filmes
+        $sql = "SELECT id, titulo, valor, poster_url FROM filmes
                 WHERE id_genero = :genero
-                ORDER BY titulo
+                ORDER BY titulo, id
                 LIMIT :limit OFFSET :offset";
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':genero', $genero, PDO::PARAM_INT);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    public function buscarPorId(int $id): ?array
+    {
+        $sql = "SELECT f.id, f.id_genero, f.titulo, f.valor, f.poster_url, g.genero
+                FROM filmes f
+                INNER JOIN generos g ON g.id = f.id_genero
+                WHERE f.id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $filme = $stmt->fetch();
+        return $filme ?: null; // Retorna null se não encontrar o filme
+    }
+
+    public function listarAtores(int $idFilme): array
+    {
+        $sql = "SELECT a.nome, fa.personagem
+                FROM atores a
+                JOIN atores_filme fa ON a.id = fa.id_ator
+                WHERE fa.id_filme = :idFilme
+                ORDER BY a.nome";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':idFilme', $idFilme, PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchAll();

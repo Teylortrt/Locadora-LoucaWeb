@@ -1,8 +1,8 @@
 <?php
 // DADOS DA CONEXAO (PADRAO PARA O XAMPP)
 
-$host = "localhost";
-$port = "3307";
+$host = "127.0.0.1";
+$port = "3306";
 $dbname = "locadora";
 $user = "root";
 $password = "";

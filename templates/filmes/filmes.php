@@ -9,6 +9,11 @@ require_once __DIR__ . '/../../src/Models/Filmes.php';
 $auth = new Auth();
 $auth->exigirLogin();
 
+// Calcula a raiz da aplicação para o JavaScript montar a URL da API (GET /filmes/{id}).
+$diretorioProjeto = str_replace('\\', '/', dirname(__DIR__, 2));
+$documentRoot = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+$raizApp = '/' . trim(str_replace($documentRoot, '', $diretorioProjeto), '/');
+
 $filmeModel = new Filmes($conn);
 
 // ===================================================
@@ -58,8 +63,9 @@ if ($genero !== '') {
     <link rel="stylesheet" href="../../public/css/normalize.css">
     <link rel="stylesheet" href="../../public/css/skeleton.css">
     <link rel="stylesheet" href="../../public/css/style.css?v=<?= filemtime(__DIR__ . '/../../public/css/style.css') ?>">
+    <script src="../../public/js/filmes.js" defer></script>
 </head>
-<body>
+<body data-raiz="<?= htmlspecialchars($raizApp) ?>">
 
     <!-- =================================================== -->
     <!-- PARTE 5: CABEÇALHO  -->
@@ -123,6 +129,7 @@ if ($genero !== '') {
         <?php if (!empty($filtrarPorGenero)): ?>
             <div class="catalogo">
                 <?php foreach ($filtrarPorGenero as $filme): ?>
+                    <a href="detalharFilme.php?id=<?= $filme['id'] ?>" class="link-filme" data-filme-id="<?= $filme['id'] ?>">
                     <div class="cartao-filme">
                         <?php if (!empty($filme['poster_url'])): ?>
                             <img class="poster-imagem"
@@ -179,21 +186,20 @@ if ($genero !== '') {
                 <?php if (!empty($filtrarFilmes)): ?>
                     <div class="catalogo">
                         <?php foreach ($filtrarFilmes as $filme): ?>
+                            <a href="detalharFilme.php?id=<?= $filme['id'] ?>" class="link-filme" data-filme-id="<?= $filme['id'] ?>">
                             <div class="cartao-filme">
                                 <?php if (!empty($filme['poster_url'])): ?>
-                                    <img class="poster-imagem"
-                                        src="<?= htmlspecialchars($filme['poster_url']) ?>"
-                                        alt="Poster de <?= htmlspecialchars($filme['titulo']) ?>"
-                                        loading="lazy">
+                                    <img class="poster-imagem" src="<?= htmlspecialchars($filme['poster_url']) ?>"
+                                        alt="Poster de <?= htmlspecialchars($filme['titulo']) ?>" loading="lazy">
                                 <?php else: ?>
                                     <div class="poster-falso">Sem Imagem</div>
                                 <?php endif; ?>
-
                                 <div class="detalhes-filme">
                                     <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
                                     <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
                                 </div>
                             </div>
+                        </a>
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
@@ -206,6 +212,7 @@ if ($genero !== '') {
             <!-- ---------- 8.3: CATÁLOGO COMPLETO (padrão, sem filtro) ---------- -->
             <div class="catalogo">
                 <?php foreach ($filmes as $filme): ?>
+                    <a href="detalharFilme.php?id=<?= $filme['id'] ?>" class="link-filme" data-filme-id="<?= $filme['id'] ?>">
                     <div class="cartao-filme">
                         <?php if (!empty($filme['poster_url'])): ?>
                             <img class="poster-imagem"
@@ -221,6 +228,7 @@ if ($genero !== '') {
                             <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
                         </div>
                     </div>
+                    </a>
                 <?php endforeach; ?>
             </div>
 
@@ -251,5 +259,11 @@ if ($genero !== '') {
         <?php endif; ?>
 
     </main>
+    <div id="modal-filme" class="modal-overlay" hidden>
+        <div class="modal-conteudo" role="dialog" aria-modal="true">
+            <button type="button" id="modal-fechar" class="modal-fechar" aria-label="Fechar">&times;</button>
+            <div id="modal-corpo"><p>Carregando...</p></div>
+        </div>
+    </div>
 </body>
 </html>

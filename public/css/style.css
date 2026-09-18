@@ -50,5 +50,46 @@ body { background: #f7f7f7; }
     .form-cadastro { margin-left: 0; }
     .card, .painel-card { padding: 2rem; }
     .barra-pesquisa form { align-items: stretch; flex-direction: column; }
-    .catalogo { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
+    .catalogo, .resultado-pesquisa { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
+}
+
+
+/* Cadastro de Filmes */
+    .paginacao { margin-top: 20px; }
+    .paginacao a { padding: 5px 10px; border: 1px solid #ccc; text-decoration: none; color: #333; margin-right: 5px;}
+    .paginacao a.ativo { background-color: #007BFF; color: white; border-color: #007BFF; }
+
+    /* CSS extra para alinhar os resultados da pesquisa */
+    .resultado-pesquisa { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; }
+    .resultado-item { width: 150px; text-align: center; }
+    .resultado-item img { max-width: 100%; border-radius: 5px; }
+    .resultado-item p { font-size: 14px; margin: 5px 0; font-weight: bold; }
+
+/* Detalhes do Filme (página dedicada e modal) */
+.ficha-filme { display: flex; gap: 3rem; align-items: flex-start; padding: 2.5rem; background: #fff; border: 1px solid #e1e1e1; border-radius: 4px; }
+.ficha-poster { flex: 0 0 300px; width: 300px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 4px; }
+.ficha-infos h1 { margin-bottom: .5rem; }
+.ficha-infos h2 { margin-top: 2rem; font-size: 1.8rem; }
+.modal-genero { color: #555; }
+.modal-valor { font-size: 1.8rem; font-weight: 600; color: #33c3f0; }
+.badge { display: inline-block; margin-top: 1rem; padding: .4rem .9rem; border-radius: 1.2rem; font-size: 1.2rem; font-weight: 600; }
+.badge.disponivel { color: #1e7e34; background: #dff0d8; }
+.badge.indisponivel { color: #a94442; background: #f2dede; }
+.elenco { margin: .5rem 0 0; padding-left: 1.4rem; }
+.elenco li { margin-bottom: .4rem; line-height: 1.4; }
+
+/* Modal overlay */
+.modal-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; background: rgba(0,0,0,.55); }
+.modal-overlay[hidden] { display: none; }
+.modal-conteudo { position: relative; max-width: 720px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 2.5rem; background: #fff; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+.modal-fechar { position: absolute; top: 1rem; right: 1.2rem; border: 0; background: none; font-size: 2.4rem; line-height: 1; cursor: pointer; color: #555; }
+.modal-conteudo .modal-poster { float: left; width: 180px; margin: 0 2rem 1rem 0; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 4px; }
+.modal-infos h2 { margin-bottom: .5rem; }
+.modal-infos hr { margin: 2rem 0; }
+.link-filme { display: block; text-decoration: none; color: inherit; }
+.link-filme:hover .cartao-filme { box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+
+@media (max-width: 549px) {
+    .ficha-filme { flex-direction: column; padding: 2rem; }
+    .ficha-poster, .modal-conteudo .modal-poster { float: none; width: 100%; margin: 0 0 1.5rem; box-sizing: border-box; }
 }

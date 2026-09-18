@@ -10,30 +10,19 @@ class FilmesController
         $this->db = $conexao;
     }
 
-    public function adicionarFilme($dados): void
+    public function salvar(array $dados): int 
     {
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
-        $titulo = $dados['titulo'] ?? '';
-        $genero = $dados['id_genero'] ?? '';
-        $poster = $dados['poster_url'] ?? '';
-        $valor = $dados['valor'] ?? '';
-
-        $sql = "INSERT INTO filmes (titulo, id_genero, valor, poster_url) VALUES (:titulo, :id_genero, :valor, :poster_url)";
+        $sql = "INSERT INTO filmes (titulo, id_genero, valor, poster_url) 
+                VALUES (:titulo, :id_genero, :valor, :poster_url)";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':titulo', $titulo);
-        $stmt->bindParam(':id_genero', $genero);
-        $stmt->bindParam(':valor', $valor);
-        $stmt->bindParam(':poster_url', $poster);
+        $stmt->execute([
+            ':titulo'     => $dados['titulo'] ?? '',
+            ':id_genero'  => $dados['id_genero'] ?? null,
+            ':valor'      => $dados['valor'] ?? 0,
+            ':poster_url' => $dados['poster_url'] ?? ''
+        ]);
 
-        if ($stmt->execute()) {
-            echo "Cadastro realizado com sucesso!";
-        } else {
-            echo "Erro ao cadastrar: " . $stmt->errorInfo()[2];
-        exit;
-        }
-
-    }
+        return (int) $this->db->lastInsertId();
     }
 }

@@ -77,7 +77,11 @@ class Auth
     public function exigirLogin(): void
     {
         if (!$this->logado()) {
-            header('Location: login.php');
+            $diretorioProjeto = str_replace('\\', '/', dirname(__DIR__, 2));
+            $documentRoot = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+            $raizApp = '/' . trim(str_replace($documentRoot, '', $diretorioProjeto), '/');
+
+            header('Location: ' . $raizApp . '/templates/login.php');
             exit;
         }
     }
