@@ -81,6 +81,10 @@ if ($genero !== '') {
                 <button type="submit" class="button button-primary">Adicionar Filmes</button>
             </form>
 
+            <form class="form-cadastro" method="GET" action="../atores/atores.php">
+                <button type="submit" class="button button-primary">Ver atores</button>
+            </form>
+
             <form class="form-sair" method="GET" action="../painel.php">
                 <button type="submit" class="button">Voltar</button>
             </form>
