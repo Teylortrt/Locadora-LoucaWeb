@@ -171,8 +171,7 @@ if ($genero !== '') {
     </div>
 
 <?php elseif ($pesquisa !== ''): ?>
-    ... resto igual
-
+    
             <!-- ---------- 8.2: RESULTADO DA PESQUISA POR TEXTO ---------- -->
             <div class="resultado-pesquisa">
                 <h2>Resultados da pesquisa:</h2>
