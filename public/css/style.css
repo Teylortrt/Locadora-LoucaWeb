@@ -1,4 +1,3 @@
-/* Complementos de layout para o Skeleton. */
 body { background: #f7f7f7; }
 .tela-central { display: flex; align-items: center; min-height: 100vh; }
 .card, .painel-card { padding: 2.5rem; background: #fff; border: 1px solid #e1e1e1; border-radius: 4px; }
@@ -8,10 +7,11 @@ body { background: #f7f7f7; }
 .marca h1 { margin: .2rem 0 0; font-size: 2.4rem; font-weight: 400; }
 .campo { margin-bottom: 1.5rem; }
 .topo { padding: 1.5rem 0; background: #fff; border-bottom: 1px solid #e1e1e1; }
-.topo .container, .acoes-topo { display: flex; align-items: center; gap: 1rem; }
+.topo .container { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .topo .marca { margin: 0; }
 .topo .marca h1 { font-size: 2rem; }
 .form-cadastro, .form-catalogo, .form-sair, .form-excluir { margin-bottom: 0; }
+.form-cadastro, .form-sair { display: flex; align-items: center; }
 .form-cadastro { margin-left: auto; }
 .conteudo { padding-top: 4rem; padding-bottom: 4rem; }
 .cadastrar-filme .card { max-width: 100%; }
@@ -32,36 +32,23 @@ body { background: #f7f7f7; }
 .catalogo-pagina { max-width: 1200px; }
 .barra-pesquisa form { display: flex; gap: 1rem; margin-bottom: 2rem; }
 .barra-pesquisa input { flex: 1; margin-bottom: 0; }
-.catalogo, .resultado-pesquisa { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 2rem; }
-.resultado-pesquisa h2 { grid-column: 1 / -1; margin-bottom: 0; }
-.cartao-filme { overflow: hidden; background: #fff; border: 1px solid #e1e1e1; border-radius: 4px; }
+.catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 2rem; }
+.resultado-pesquisa h2 { margin-bottom: 1.5rem; }
+.cartao-filme { display: flex; flex-direction: column; overflow: hidden; background: #fff; border: 1px solid #e1e1e1; border-radius: 6px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
 .poster-imagem, .poster-falso { display: block; width: 100%; aspect-ratio: 2 / 3; }
 .poster-imagem { object-fit: cover; }
 .poster-falso { display: grid; place-items: center; padding: 1.5rem; color: #777; background: #eee; text-align: center; }
-.detalhes-filme { padding: 1.5rem; }
-.detalhes-filme h3 { margin-bottom: 1rem; font-size: 1.8rem; }
+.detalhes-filme { display: flex; flex: 1; flex-direction: column; justify-content: space-between; padding: 1.5rem; }
+.detalhes-filme h3 { margin-bottom: 1rem; font-size: 1.6rem; line-height: 1.2; }
 .detalhes-filme p { margin-bottom: 0; color: #555; font-weight: 600; }
 .paginacao { margin-top: 2rem; }
-.paginacao a { display: inline-block; margin: 0 .3rem .5rem 0; padding: 0 .8rem; border: 1px solid #d1d1d1; border-radius: 4px; line-height: 3.6rem; text-decoration: none; }
+.paginacao a { display: inline-block; margin: 0 .3rem .5rem 0; padding: 0 .8rem; border: 1px solid #d1d1d1; border-radius: 4px; line-height: 3.6rem; text-decoration: none; color: #333; }
 .paginacao a.ativo { color: #fff; background: #33c3f0; border-color: #33c3f0; }
 
 @media (max-width: 549px) {
-    .topo .container { flex-wrap: wrap; }
+    .topo .container { flex-direction: column; align-items: flex-start; }
     .form-cadastro { margin-left: 0; }
-    .acoes-topo { width: 100%; }
     .card, .painel-card { padding: 2rem; }
     .barra-pesquisa form { align-items: stretch; flex-direction: column; }
-    .catalogo, .resultado-pesquisa { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
+    .catalogo { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
 }
-
-
-/* Cadastro de Filmes */
-    .paginacao { margin-top: 20px; }
-    .paginacao a { padding: 5px 10px; border: 1px solid #ccc; text-decoration: none; color: #333; margin-right: 5px;}
-    .paginacao a.ativo { background-color: #007BFF; color: white; border-color: #007BFF; }
-    
-    /* CSS extra para alinhar os resultados da pesquisa */
-    .resultado-pesquisa { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; }
-    .resultado-item { width: 150px; text-align: center; }
-    .resultado-item img { max-width: 100%; border-radius: 5px; }
-    .resultado-item p { font-size: 14px; margin: 5px 0; font-weight: bold; }

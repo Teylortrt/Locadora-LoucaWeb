@@ -1,46 +1,54 @@
 <?php
 
-// Carrega as dependências necessárias para autenticação e acesso aos filmes.
+// ===================================================
+// PARTE 1: DEPENDÊNCIAS E AUTENTICAÇÃO
+// ===================================================
 require_once __DIR__ . '/../../src/Models/Auth.php';
 require_once __DIR__ . '/../../src/Models/Filmes.php';
 
-// Garante que somente usuários autenticados acessem o catálogo.
 $auth = new Auth();
 $auth->exigirLogin();
 
 $filmeModel = new Filmes($conn);
 
-// Obtém a quantidade total para calcular o número de páginas.
+// ===================================================
+// PARTE 2: PAGINAÇÃO (catálogo completo)
+// ===================================================
 $totalRegistros = $filmeModel->contarTotal();
+$registrosPorPagina = 25;
 
-// Usa uma string vazia quando não há pesquisa informada na URL.
+$paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+if ($paginaAtual < 1) {
+    $paginaAtual = 1;
+}
+
+$offset = ($paginaAtual - 1) * $registrosPorPagina;
+$totalPaginas = ceil($totalRegistros / $registrosPorPagina);
+$filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
+
+// ===================================================
+// PARTE 3: FILTRO POR PESQUISA
+// ===================================================
 $pesquisa = trim($_GET['pesquisa'] ?? '');
 $parametroPesquisa = $pesquisa !== ''
     ? '&pesquisa=' . urlencode($pesquisa)
     : '';
 $filtrarFilmes = $filmeModel->filtrarFilmes($pesquisa);
 
-// Define quantos filmes serão exibidos por página.
-$registrosPorPagina = 25;
-
-// Converte o parâmetro da URL para inteiro e usa a primeira página como padrão.
-$paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
-if ($paginaAtual < 1) {
-    $paginaAtual = 1;
+// ===================================================
+// PARTE 4: FILTRO POR GÊNERO botões
+// ===================================================
+$genero = trim($_GET['genero'] ?? '');
+if ($genero !== '') {
+    $totalRegistrosGenero = $filmeModel->contarPorGenero((int)$genero);
+    $totalPaginasGenero = ceil($totalRegistrosGenero / $registrosPorPagina);
+    $offsetGenero = ($paginaAtual - 1) * $registrosPorPagina;
+    $filtrarPorGenero = $filmeModel->filtrarPorGenero((int)$genero, $registrosPorPagina, $offsetGenero);
+} else {
+    $filtrarPorGenero = [];
+    $totalPaginasGenero = 0;
 }
-
-// Cálculo do Offset (Deslocamento)
-// Ex: Página 1 = (1 - 1) * 5 = 0 (Busca a partir do 0)
-// Ex: Página 2 = (2 - 1) * 5 = 5 (Busca a partir do 5)
-$offset = ($paginaAtual - 1) * $registrosPorPagina;
-
-// Arredonda para cima para incluir uma página com os registros restantes.
-$totalPaginas = ceil($totalRegistros / $registrosPorPagina);
-
-// Busca apenas os filmes necessários para a página atual.
-$filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -53,14 +61,16 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
 </head>
 <body>
 
+    <!-- =================================================== -->
+    <!-- PARTE 5: CABEÇALHO  -->
+    <!-- =================================================== -->
     <header class="topo">
         <div class="container">
-        <div class="marca">
-            <span>Locadora</span>
-            <h1>LoucaWeb</h1>
-        </div>
+            <div class="marca">
+                <span>Locadora</span>
+                <h1>LoucaWeb</h1>
+            </div>
 
-    
             <form class="form-cadastro" method="GET" action="cadastrarFilme.php">
                 <button type="submit" class="button button-primary">Adicionar Filmes</button>
             </form>
@@ -68,27 +78,106 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
             <form class="form-sair" method="GET" action="../painel.php">
                 <button type="submit" class="button">Voltar</button>
             </form>
-
-
         </div>
     </header>
 
     <main class="container conteudo catalogo-pagina">
         <h1>Catálogo</h1>
-        
+
+        <!-- =================================================== -->
+        <!-- PARTE 6: BOTÕES DE GÊNERO -->
+        <!-- =================================================== -->
+        <div class="botoes-genero">
+            <form method="GET" action="">
+                <button type="submit" name="genero" value="1" class="button button-primary">Ação</button>
+                <button type="submit" name="genero" value="2" class="button button-primary">Aventura</button>
+                <button type="submit" name="genero" value="3" class="button button-primary">Animação</button>
+                <button type="submit" name="genero" value="4" class="button button-primary">Comédia</button>
+                <button type="submit" name="genero" value="5" class="button button-primary">crime</button>
+                <button type="submit" name="genero" value="6" class="button button-primary">Documentário</button>
+                <button type="submit" name="genero" value="7" class="button button-primary">Drama</button>
+                <button type="submit" name="genero" value="8" class="button button-primary">Fantasia</button>
+                <button type="submit" name="genero" value="" class="button button-primary">Todos</button>
+            </form>
+        </div>
+
+        <!-- =================================================== -->
+        <!-- PARTE 7: BARRA DE PESQUISA -->
+        <!-- =================================================== -->
         <div class="barra-pesquisa">
-            
             <form method="GET" action="">
                 <input class="u-full-width" type="text" name="pesquisa" placeholder="Pesquisar por título..." value="<?= htmlspecialchars($_GET['pesquisa'] ?? '') ?>">
                 <button type="submit" class="button button-primary">Pesquisar</button>
             </form>
+        </div>
 
-            <?php if ($pesquisa !== ''): ?>
-            <!-- Resultados da Pesquisa -->
-                <div class="resultado-pesquisa">
-                    <h2>Resultados da pesquisa:</h2>
-        <!--EXECUTANTANDO A PESQUISA-->
-                    <?php if (!empty($filtrarFilmes)): ?>
+        <!-- =================================================== -->
+        <!-- PARTE 8: EXIBIÇÃO DE RESULTADOS                        -->
+        <!-- Prioridade: 1º gênero, 2º pesquisa, 3º catálogo padrão -->
+        <!-- =================================================== -->
+
+        <?php if ($genero !== ''): ?>
+
+    <!-- ---------- 8.1: RESULTADO FILTRADO POR GÊNERO ---------- -->
+    <div class="resultado-pesquisa">
+        <?php if (!empty($filtrarPorGenero)): ?>
+            <div class="catalogo">
+                <?php foreach ($filtrarPorGenero as $filme): ?>
+                    <div class="cartao-filme">
+                        <?php if (!empty($filme['poster_url'])): ?>
+                            <img class="poster-imagem"
+                                src="<?= htmlspecialchars($filme['poster_url']) ?>"
+                                alt="Poster de <?= htmlspecialchars($filme['titulo']) ?>"
+                                loading="lazy">
+                        <?php else: ?>
+                            <div class="poster-falso">Sem Imagem</div>
+                        <?php endif; ?>
+
+                        <div class="detalhes-filme">
+                            <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
+                            <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Paginação do gênero -->
+            <div class="paginacao">
+                <?php if ($paginaAtual > 1): ?>
+                    <a href="?genero=<?= urlencode($genero) ?>&pagina=1">Primeira</a>
+                    <a href="?genero=<?= urlencode($genero) ?>&pagina=<?= $paginaAtual - 1 ?>">Anterior</a>
+                <?php endif; ?>
+
+                <?php
+                $inicioG = max(1, $paginaAtual - 6);
+                $fimG = min($totalPaginasGenero, $paginaAtual + 6);
+                for ($i = $inicioG; $i <= $fimG; $i++): ?>
+                    <a href="?genero=<?= urlencode($genero) ?>&pagina=<?= $i ?>" class="<?= ($i == $paginaAtual) ? 'ativo' : '' ?>">
+                        <?= $i ?>
+                    </a>
+                <?php endfor; ?>
+
+                <?php if ($paginaAtual < $totalPaginasGenero): ?>
+                    <a href="?genero=<?= urlencode($genero) ?>&pagina=<?= $paginaAtual + 1 ?>">Próximo</a>
+                    <a href="?genero=<?= urlencode($genero) ?>&pagina=<?= $totalPaginasGenero ?>">Última</a>
+                <?php endif; ?>
+
+                <p>Total de Páginas: <?= $totalPaginasGenero ?></p>
+            </div>
+
+        <?php else: ?>
+            <p>Nenhum filme encontrado nesse gênero.</p>
+        <?php endif; ?>
+    </div>
+
+<?php elseif ($pesquisa !== ''): ?>
+    
+            <!-- ---------- 8.2: RESULTADO DA PESQUISA POR TEXTO ---------- -->
+            <div class="resultado-pesquisa">
+                <h2>Resultados da pesquisa:</h2>
+
+                <?php if (!empty($filtrarFilmes)): ?>
+                    <div class="catalogo">
                         <?php foreach ($filtrarFilmes as $filme): ?>
                             <div class="cartao-filme">
                                 <?php if (!empty($filme['poster_url'])): ?>
@@ -103,90 +192,64 @@ $filmes = $filmeModel->listarPorPagina($registrosPorPagina, $offset);
                                 <div class="detalhes-filme">
                                     <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
                                     <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
-
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <p>Nenhum filme encontrado.</p>
-                    <?php endif; ?>
-
-                    <?php if ($totalPaginas > 1): ?>
-                    <div class="paginacao">
-                    <?php if ($paginaAtual > 1): ?>
-                        <a href="?pagina=1<?= $parametroPesquisa ?>">Primeira</a>
-                        <a href="?pagina=<?= $paginaAtual - 1 ?><?= $parametroPesquisa ?>">Anterior</a>
-                    <?php endif; ?>
-
-                    <?php
-                    $inicio = max(1, $paginaAtual - 6);
-                    $fim = min($totalPaginas, $paginaAtual + 6);
-
-                    for ($i = $inicio; $i <= $fim; $i++): ?>
-                        <a href="?pagina=<?= $i ?><?= $parametroPesquisa ?>" class="<?= ($i == $paginaAtual) ? 'ativo' : '' ?>">
-                            <?= $i ?>
-                        </a>
-                    <?php endfor; ?>
-
-                    <?php if ($paginaAtual < $totalPaginas): ?>
-                        <a href="?pagina=<?= $paginaAtual + 1 ?><?= $parametroPesquisa ?>">Próximo</a>
-                        <a href="?pagina=<?= $totalPaginas ?><?= $parametroPesquisa ?>">Última</a>
-                    <?php endif; ?>
-
-                    <p>Total de Páginas: <?= $totalPaginas ?></p>
                     </div>
-                    <?php endif; ?>
-                </div>
-                
-        <!-- Se não houver pesquisa, exibe o catálogo completo -->
-            <?php else: ?>
-                <!-- Listagem de Dados em Grid -->
-                <div class="catalogo">
-                    <?php foreach ($filmes as $filme): ?>
-                        <div class="cartao-filme">
-                            <?php if (!empty($filme['poster_url'])):?>
-                                <img class="poster-imagem"
-                                    src="<?= htmlspecialchars($filme['poster_url']) ?>"
-                                    alt="Poster de <?= htmlspecialchars($filme['titulo']) ?>"
-                                    loading="lazy">
-                            <?php else: ?>
-                                <div class="poster-falso">Sem Imagem</div>
-                            <?php endif;?>
+                <?php else: ?>
+                    <p>Nenhum filme encontrado.</p>
+                <?php endif; ?>
+            </div>
 
-                            <div class="detalhes-filme">
-                                <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
-                                <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
-                            </div>
+        <?php else: ?>
+
+            <!-- ---------- 8.3: CATÁLOGO COMPLETO (padrão, sem filtro) ---------- -->
+            <div class="catalogo">
+                <?php foreach ($filmes as $filme): ?>
+                    <div class="cartao-filme">
+                        <?php if (!empty($filme['poster_url'])): ?>
+                            <img class="poster-imagem"
+                                src="<?= htmlspecialchars($filme['poster_url']) ?>"
+                                alt="Poster de <?= htmlspecialchars($filme['titulo']) ?>"
+                                loading="lazy">
+                        <?php else: ?>
+                            <div class="poster-falso">Sem Imagem</div>
+                        <?php endif; ?>
+
+                        <div class="detalhes-filme">
+                            <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
+                            <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
                         </div>
-                    <?php endforeach; ?>
-                </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
 
-                <!-- Navegação entre as páginas do catálogo. -->
-                <div class="paginacao">
-                    <?php if ($paginaAtual > 1): ?>
-                        <a href="?pagina=1">Primeira</a>
-                        <a href="?pagina=<?= $paginaAtual - 1 ?>">Anterior</a>
-                    <?php endif; ?>
+            <!-- ---------- 8.4: PAGINAÇÃO (só aparece no catálogo padrão) ---------- -->
+            <div class="paginacao">
+                <?php if ($paginaAtual > 1): ?>
+                    <a href="?pagina=1">Primeira</a>
+                    <a href="?pagina=<?= $paginaAtual - 1 ?>">Anterior</a>
+                <?php endif; ?>
 
-                    <?php
-                    $inicio = max(1, $paginaAtual - 6);
-                    $fim = min($totalPaginas, $paginaAtual + 6);
+                <?php
+                $inicio = max(1, $paginaAtual - 6);
+                $fim = min($totalPaginas, $paginaAtual + 6);
+                for ($i = $inicio; $i <= $fim; $i++): ?>
+                    <a href="?pagina=<?= $i ?>" class="<?= ($i == $paginaAtual) ? 'ativo' : '' ?>">
+                        <?= $i ?>
+                    </a>
+                <?php endfor; ?>
 
-                    for ($i = $inicio; $i <= $fim; $i++): ?>
-                        <a href="?pagina=<?= $i ?>" class="<?= ($i == $paginaAtual) ? 'ativo' : '' ?>">
-                            <?= $i ?>
-                        </a>
-                    <?php endfor; ?>
+                <?php if ($paginaAtual < $totalPaginas): ?>
+                    <a href="?pagina=<?= $paginaAtual + 1 ?>">Próximo</a>
+                    <a href="?pagina=<?= $totalPaginas ?>">Última</a>
+                <?php endif; ?>
 
-                    <?php if ($paginaAtual < $totalPaginas): ?>
-                        <a href="?pagina=<?= $paginaAtual + 1 ?>">Próximo</a>
-                        <a href="?pagina=<?= $totalPaginas ?>">Última</a>
-                    <?php endif; ?>
+                <p>Total de Páginas: <?= $totalPaginas ?></p>
+            </div>
 
-                    <p>Total de Páginas: <?= $totalPaginas ?></p>
-                </div>
-            <?php endif; ?>
-        </div>
-    </main>            
+        <?php endif; ?>
+
+    </main>
 </body>
 </html>

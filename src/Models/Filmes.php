@@ -14,18 +14,19 @@ class Filmes
     {
         $sql = "SELECT * FROM filmes ORDER BY id";
         $stmt = $this->db->query($sql);
-        
+
         return $stmt->fetchAll(); // PDO::FETCH_ASSOC já foi definido no arquivo de conexão
     }
 
-    public function listarPorPagina(int $limit, int $offset): array    {
+    public function listarPorPagina(int $limit, int $offset): array
+    {
         $sql = "SELECT titulo, valor, poster_url FROM filmes LIMIT :limit OFFSET :offset";
         // BindValue com PARAM_INT é obrigatório para LIMIT/OFFSET no MySQL
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
-        
+
         return $stmt->fetchAll();
     }
 
@@ -43,7 +44,7 @@ class Filmes
     {
         $sql = "INSERT INTO filmes (id_genero, titulo, valor, poster_url) VALUES (:id_genero, :titulo, :valor, :poster_url)";
         $stmt = $this->db->prepare($sql);
-        
+
         return $stmt->execute([
             'id_genero'  => $dados['id_genero'],
             'titulo'     => $dados['titulo'],
@@ -62,8 +63,34 @@ class Filmes
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':termo', '%' . $termo . '%', PDO::PARAM_STR);
         $stmt->execute();
-        
+
         return $stmt->fetchAll();
     }
 
+    // Conta quantos filmes existem para um determinado gênero (usado na paginação)
+    public function contarPorGenero(int $genero): int
+    {
+        $sql = "SELECT COUNT(id) FROM filmes WHERE id_genero = :genero";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':genero', $genero, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    // Busca os filmes de um gênero específico, já com paginação (igual listarPorPagina)
+    public function filtrarPorGenero(int $genero, int $limit, int $offset): array
+    {
+        $sql = "SELECT titulo, valor, poster_url FROM filmes
+                WHERE id_genero = :genero
+                ORDER BY titulo
+                LIMIT :limit OFFSET :offset";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':genero', $genero, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
 }
