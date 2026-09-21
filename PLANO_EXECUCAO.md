@@ -1,129 +1,112 @@
-# Plano de Implementação por Pessoa
+# Plano de Implementação por Pessoa (2 pessoas)
 
-## FASE 0 — Unificação da Fundação (os 3 juntos, ~1 sessão)
+## FASE 0 — Estado atual e alinhamento (os 2 juntos, ~1 sessão)
 
-Resolve as bases para todos partirem de um código sólido e idêntico.
+Resolve as bases para os dois partirem de um código sólido e idêntico. Boa parte do sistema **já está pronta** (ver seção "Já pronto" no fim); a Fase 0 serve só para destravar o que falta.
 
-1. **Commit do estado atual** — o repo está mid-migração Laravel→PHP puro, com tudo unstaged. Commitar antes de ramificar.
-2. **`Connection.php`** — ✅ **já foi criada** nesta sessão (`src/Database/Connection.php`). Agora `POST /login` e `/cadastrar` deixam de crashar.
-3. **Padronizar conexão** — decidir usar `Connection::getInstance()` nos Models. O `config/conexao.php` (função `conexao()`) fica só pro `src/Auth.php` legado; não usar nos novos Models.
-4. **Verificar porta do banco** — `3312` em `config/database.php` é fora do padrão; confirmar se a porta local é essa. Fazer um teste de conexão real.
-5. **Estrutura de branches** — começar do consenso abaixo antes de ramificar.
+1. **Garantir `develop` atualizada** — o trabalho recente (tela de atores, catálogo, filtros, sinopse TMDB) já está na `develop`. Confirmar que `feature/ator` foi mergeada e commitar qualquer pendência antes de ramificar.
+2. **Definir padrão de conexão (decisão)** — o padrão vigente é `$conn` vindo de `config/conexao.php`, injetado no construtor dos Models (`new Model($conn)`), com classes globais carregadas por `require_once`. **Manter esse padrão nos módulos novos.** A classe `App\Database\Connection` aponta para `config/database.php`, que **não existe** — tratar como legado e não depender dela nos módulos novos (ou criar o arquivo depois, se quiserem unificar).
+3. **Rotas API** — continuar registrando em `public/index.php` seguindo o padrão das rotas existentes (`GET/POST /filmes`, `POST /login`). Já existe um `spl_autoload_register` para o namespace `App\`; modelos/web continuam com `require_once`.
+4. **Estrutura de branches** — começar do consenso abaixo antes de ramificar.
 
 ---
 
-## Estratégia de Git (para trabalhar em paralelo)
+## Estratégia de Git (para 2 pessoas trabalharem em paralelo)
 
 ```
 main
  └── develop              ← branch de integração
-     ├── feature/clientes         (Pessoa A)
-     ├── feature/filmes           (Pessoa B)
-     └── feature/dvds-emprestimos (Pessoa C)
+     ├── feature/pessoa-a-clientes-atores
+     └── feature/pessoa-b-emprestimos
 ```
 
-- Cada um cria sua `feature/` a partir da `develop`.
+- Cada pessoa cria sua `feature/` a partir da `develop`.
 - Commits pequenos e frequentes.
-- Merge na `develop` por PR/discussão com o grupo.
-- A Fase 0 (incluindo `Connection.php`) deve ser mergeada primeiro, pois é base de todos.
+- Merge na `develop` por PR/discussão com o colega (evitar merge direto na `main`).
+- A Fase 0 deve estar na `develop` antes das duas ramificarem.
 
 ---
 
-## 👤 PESSOA A — Módulo Clientes + Relatórios
+## 👤 PESSOA A — Módulo Clientes + Atores + Relatórios
 
-**Arquivos a criar:**
+**Arquivos:**
 ```
-src/Models/Cliente.php
-src/Controllers/ClienteController.php
-src/Services/RelatorioService.php   (bônus, no fim)
+src/Models/cliente.php                       ← completar (hoje só tem listarTodos)
+src/Controllers/ClienteController.php        ← implementar (hoje vazio)
+src/Controllers/excluirclientescontroller.php ← refatorar p/ usar o Model (hoje SQL solto)
+src/Models/AtorModel.php                     ← adicionar criar/atualizar (hoje só listar)
+src/Controllers/AtorController.php           ← criar (cadastro/edição de atores)
+templates/atores/cadastroAtor.php            ← criar (link já existe em templates/atores/atores.php)
+templates/atores/cadastroFilmeAtor.php       ← criar (vínculo na pivot atores_filme)
+templates/atores/editarfilmes.php            ← criar (link já existe em atoresFilmes.php)
+src/Services/RelatorioService.php            ← bônus (no fim)
 ```
 
-**Contrato (CONTRATOS.md atualizado):**
+**Contrato que EXPÕE (CONTRATOS.md):**
 ```php
 public function buscarPorId(int $id): array|null
 // ['id','nome','sobrenome','telefone','endereco'] ou null
 public function existe(int $id): bool
 ```
 
+**Contratos que CONSUME:** `Filme::buscarPorId` (✅ pronto) e `Emprestimo::listarPorCliente` / `Devolucao::registrar` (só no Relatório — usar versão fake se a Pessoa B não terminou).
+
 **Passos:**
-1. Model `Cliente` com os métodos do contrato + `listar()`, `criar()`, `atualizar()`, `deletar()` (CRUD completo).
-2. `ClienteController` seguindo o padrão do `AuthController` (lê `php://input`, retorna JSON com códigos HTTP).
+1. Completar `src/Models/cliente.php`: `buscarPorId`, `existe` + CRUD (`listar`, `criar`, `atualizar`, `deletar`).
+2. Implementar `ClienteController` seguindo o padrão dos controllers de API (lê `php://input`, retorna JSON com códigos HTTP — referência: `AuthController`).
 3. Registrar rotas em `public/index.php`: `GET/POST /clientes`, `GET/PUT/DELETE /clientes/{id}`.
-4. **Bônus (se sobrar tempo):** `RelatorioService` — consultas agregadas (clientes com mais empréstimos, faturamento), usando os contratos das Pessoas B e C (com versões fake se necessário).
-5. Testar cada endpoint com `curl`.
+4. Refatorar `cadastro.php`, `editarclientes.php` e `excluirclientescontroller.php` para usar o Model (hoje usam SQL solto).
+5. **Sucesso =** cadastrar/editar/excluir cliente pela tela e via API (`curl`).
+6. **Finalizar módulo de Atores:** cadastro e edição de atores, e o vínculo ator↔filme na pivot `atores_filme` (telas já linkadas mas inexistentes).
+7. **Bônus:** `RelatorioService` — consultas agregadas (clientes com mais empréstimos, faturamento), usando os contratos da Pessoa B (com versões fake se necessário).
 
-**Depende de:** nada para o CRUD. Só relatório depende de B e C.
-
----
-
-## 🎬 PESSOA B — Módulo Filmes, Atores e Gêneros
-
-**Arquivos a criar:**
-```
-src/Models/Filme.php
-src/Models/Ator.php
-src/Models/Genero.php
-src/Controllers/FilmeController.php
-src/Controllers/AtorController.php
-src/Controllers/GeneroController.php
-```
-
-**Contrato (CONTRATOS.md atualizado):**
-```php
-public function buscarPorId(int $id): array|null
-// ['id','id_genero','titulo','valor'] ou null
-public function listarPorAtor(int $idAtor): array
-```
-
-**Passos:**
-1. Models `Genero` (simples), `Ator` (simples), `Filme` (contrato + `listar()`, `criar()`, `atualizar()`).
-2. **`FilmeController::index()` — PRIORIDADE ALTA** — a rota `GET /filmes` já existe em `public/index.php:51-55` e hoje crasha (fatal error). Implementar primeiro.
-3. CRUD de atores e gêneros.
-4. Gerenciar a **pivot `atores_filme`** — adicionar/remover atores de um filme (base do `listarPorAtor`).
-5. Registrar rotas em `index.php`.
-6. Testar com `curl`.
-
-**Depende de:** nada (independente).
+**Depende de:** nada para CRUD de clientes/atores. Só o relatório depende de B.
 
 ---
 
-## 💿 PESSOA C — Módulo DVDs, Empréstimos e Devoluções + Infraestrutura
+## 💿 PESSOA B — Módulo DVDs, Empréstimos e Devoluções + Multa
 
-**Arquivos a criar:**
+**Arquivos:**
 ```
-src/Database/Connection.php        ← ✅ já criado nesta sessão
-src/Models/Dvd.php
-src/Models/Emprestimo.php
-src/Models/Devolucao.php
-src/Models/FilmeEmprestimo.php
-src/Controllers/EmprestimoController.php
-src/Controllers/DevolucaoController.php
-src/Services/MultaService.php      (cálculo de multa por atraso)
+src/Models/Dvd.php                       ← adicionar buscarDisponivelPorFilme
+src/Models/Emprestimo.php                ← criar
+src/Models/FilmeEmprestimo.php           ← criar
+src/Models/Devolucao.php                 ← criar
+src/Models/FilmeDevolucao.php            ← criar
+src/Controllers/EmprestimoController.php ← criar
+src/Controllers/DevolucaoController.php  ← criar
+src/Services/MultaService.php            ← criar (cálculo de multa por atraso)
+templates/emprestimos/                   ← telas (listar, registrar, devolver)
 ```
 
-**Contratos (CONTRATOS.md atualizado):**
+**Contratos (CONTRATOS.md):**
 ```php
 // DVD — tabela: dvds (id, id_filme, quantidade). Sem coluna status.
-public function verificarDisponibilidade(int $idFilme): int
-// nº de cópias livres (sum quantidade - emprestadas sem devolução)
-public function buscarDisponivelPorFilme(int $idFilme): array|null
-// ['id','id_filme','quantidade'] ou null
+public function verificarDisponibilidade(int $idFilme): int        // ✅ pronto
+public function buscarDisponivelPorFilme(int $idFilme): array|null  // a criar
 
 // Empréstimo — tabela: emprestimos (id, data, id_cliente). Sem data_prevista/status.
 public function buscarPorId(int $id): array|null
 public function listarPorCliente(int $idCliente): array
 public function estaAtrasado(int $idEmprestimo): bool
+public function registrar(array $dados): int
+
+// Devolução — tabela: devolucoes (id, id_emprestimo, data).
+public function registrar(int $idEmprestimo): array
 ```
 
-**Passos:**
-1. Model `Dvd`.
-2. Model `Emprestimo` + pivot `filmes_emprestimo` (fluxo: registrar empréstimo → localizar DVD disponível → criar linha no pivot).
-3. Model `Devolucao` + pivot `filmes_devolucao`.
-4. `MultaService` (regra de atraso, usando `estaAtrasado`).
-5. Controllers + rotas.
-6. Testar com `curl`.
+**Contratos que CONSUME:** `Cliente::existe()` (da Pessoa A) e `Filme::buscarPorId` (✅ pronto). Usar versão fake de `Cliente::existe` se a Pessoa A ainda não terminou.
 
-**Depende de:** A (`Cliente::existe`) e B (`Filme::buscarPorId`).
+**Passos:**
+1. Adicionar `Dvd::buscarDisponivelPorFilme()` (base no SQL de `verificarDisponibilidade`).
+2. Model `Emprestimo` + pivot `filmes_emprestimo` (fluxo: validar cliente → localizar DVD disponível → gravar empréstimo + itens).
+3. Model `Devolucao` + pivot `filmes_devolucao` (marcar itens como devolvidos).
+4. `MultaService` — regra de atraso (prazo padrão de 7 dias), usando `estaAtrasado`; retorno da multa na devolução.
+5. Controllers (`EmprestimoController`, `DevolucaoController`) + rotas: `POST /emprestimos`, `POST /devolucoes`, `GET /emprestimos/cliente/{id}` (registrar em `public/index.php`).
+6. Telas em `templates/emprestimos/` (registrar empréstimo, devolver, listar por cliente) e link no painel.
+7. Testar o fluxo completo com `curl`.
+
+**Depende de:** Pessoa A (`Cliente::existe`) e do `Filme::buscarPorId` já pronto.
 
 ---
 
@@ -131,9 +114,20 @@ public function estaAtrasado(int $idEmprestimo): bool
 
 | Pessoa | Módulo | Depende de | Prioridade |
 |--------|--------|-----------|-----------|
-| **—** | `Connection.php` | — | ✅ pronto |
-| A | Clientes (+relatório) | B/C só no relatório | Média |
-| B | Filmes/Atores/Gêneros | — | Alta (`/filmes` já crasha) |
-| C | DVDs/Empréstimos/Devoluções | A (`existe`) + B (`buscarPorId`) | Alta (mais complexo) |
+| — | Fundações (auth, catálogo, filtros, sinopse, atores, clientes) | — | ✅ pronto |
+| A | Clientes + Atores (+ relatório bônus) | B só no relatório | Alta |
+| B | DVDs / Empréstimos / Devoluções / Multa | A (`Cliente::existe`) | Alta (mais complexo) |
 
-Equilíbrio: **A** é a mais leve (CRUD simples + relatório bônus); **C** é a mais pesada (fluxo completo empréstimo/devolução). Se quiser reequilibrar, dá pra mover o relatório para B ou a infraestrutura para A.
+Equilíbrio: **A** é a mais leve (CRUD de clientes/atores já tem base pronta + relatório bônus); **B** é a mais pesada (fluxo completo empréstimo/devolução + multa). Se quiser reequilibrar: dar o `RelatorioService` para B após o fluxo de empréstimos, ou passar a finalização de Atores para B.
+
+---
+
+## ✅ Já pronto (não refazer)
+
+- Autenticação (web + API): `src/Models/Auth.php`, `src/Controllers/AuthController.php`, `src/Models/Usuario.php`.
+- Catálogo de filmes: tela com paginação, filtro por gênero e pesquisa (`templates/filmes/filmes.php`), detalhe com sinopse via TMDb (`detalharFilme.php`), cadastro de filme + DVD com busca no TMDb (`cadastrarFilme.php`).
+- API de filmes: `GET /filmes`, `GET /filmes/{id}` em `public/index.php` (usam `Filmes` e `Dvd`).
+- Models: `Filmes`, `Dvd` (parcial), `Generos`, `AtorModel`, `cliente` (parcial), `Auth`, `Usuario`.
+- Controllers: `FilmesController::salvar`, `DVDController::inserirDVD`, `AuthController`.
+- Telas de atores: `templates/atores/atores.php`, `atoresFilmes.php`.
+- Telas de clientes: `templates/tabelaclientes.php`, `editarclientes.php`, `cadastro.php`, `excluirclientescontroller.php` (prontas mas com SQL solto — migrar para o Model).
