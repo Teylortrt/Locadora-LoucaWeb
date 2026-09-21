@@ -1,6 +1,6 @@
-# Contratos de Integração — Sistema de Locadora (2 pessoas)
+# Contratos de Integração — Sistema de Locadora (3 pessoas)
 
-Este documento define os métodos que cada módulo expõe para os demais, para que as **duas pessoas** do grupo possam desenvolver em paralelo sem depender da implementação final uma da outra. Assinatura combinada aqui = assinatura que não muda depois sem avisar o grupo.
+Este documento define os métodos que cada módulo expõe para os demais, para que as **três pessoas** do grupo possam desenvolver em paralelo sem depender da implementação final uma da outra. Assinatura combinada aqui = assinatura que não muda depois sem avisar o grupo.
 
 **Este contrato reflete o estado ATUAL do código** (`develop`). O que já existe não deve ser refeito com outro nome — os nomes reais abaixo têm precedência sobre qualquer versão antiga "de papel".
 
@@ -33,7 +33,7 @@ O schema vigente está em `database/locadora.sql`.
 
 ---
 
-## Cliente (Pessoa A) → usado por Empréstimo (Pessoa B) e Relatórios (Pessoa A)
+## Cliente (Pessoa A) → usado por Empréstimo (Pessoa C) e Relatórios (Pessoa A)
 
 Tabela: `clientes` (`id`, `nome`, `sobrenome`, `telefone`, `endereco`)
 
@@ -50,7 +50,7 @@ public function existe(int $id): bool
 // Interno do módulo (também da Pessoa A): listar(), criar(), atualizar(), deletar()
 ```
 
-## Filme (Pessoa A — dono; ✅ pronto) → usado por Empréstimo (Pessoa B) e Relatórios (Pessoa A)
+## Filme (Pessoa B — dono; ✅ pronto) → usado por Empréstimo (Pessoa C) e Relatórios (Pessoa A)
 
 Tabela: `filmes` (`id`, `id_genero`, `titulo`, `valor`, `poster_url`)
 
@@ -64,7 +64,7 @@ public function listarPorAtor(int $idAtor): array
 // retorna: lista de filmes (id, titulo, personagem) em que o ator participou, via pivot atores_filme
 ```
 
-## DVD (Pessoa B — dono; parcial) → usado por Empréstimo (Pessoa B) e Relatórios (Pessoa A)
+## DVD (Pessoa C — dono; parcial) → usado por Empréstimo (Pessoa C) e Relatórios (Pessoa A)
 
 Tabela: `dvds` (`id`, `id_filme`, `quantidade`)
 
@@ -76,12 +76,12 @@ public function verificarDisponibilidade(int $idFilme): int  // ✅ src/Models/D
 // (soma de `quantidade` dos dvds do filme - cópias já emprestadas em
 //  empréstimos sem devolução registrada)
 
-public function buscarDisponivelPorFilme(int $idFilme): array|null  // ⚠️ A CRIAR (Pessoa B)
+public function buscarDisponivelPorFilme(int $idFilme): array|null  // ⚠️ A CRIAR (Pessoa C)
 // retorna: um DVD com cópia livre pra alugar -> ['id' => 12, 'id_filme' => 4, 'quantidade' => 5]
 // ou null se não houver nenhuma cópia disponível
 ```
 
-## Empréstimo (Pessoa B — dono; ⚠️ A CRIAR) → usado por Devolução (Pessoa B) e Relatórios (Pessoa A)
+## Empréstimo (Pessoa C — dono; ⚠️ A CRIAR) → usado por Devolução (Pessoa C) e Relatórios (Pessoa A)
 
 Tabela: `emprestimos` (`id`, `data`, `id_cliente`)
 Itens do empréstimo em `filmes_emprestimo` (`id`, `id_dvd`, `id_emprestimo`).
@@ -107,7 +107,7 @@ public function registrar(array $dados): int  // id_do_emprestimo criado
 // (usa Dvd::buscarDisponivelPorFilme) e gravar linhas em filmes_emprestimo
 ```
 
-## Devolução (Pessoa B — dono; ⚠️ A CRIAR) → usado por Relatórios (Pessoa A)
+## Devolução (Pessoa C — dono; ⚠️ A CRIAR) → usado por Relatórios (Pessoa A)
 
 Tabela: `devolucoes` (`id`, `id_emprestimo`, `data`)
 Itens devolvidos em `filmes_devolucao` (`id`, `id_devolucao`, `id_filme_emprestimo`).
@@ -121,21 +121,23 @@ public function registrar(int $idEmprestimo): array
 
 ---
 
-## Interfaces Pessoa A ⇄ Pessoa B
+## Interfaces entre as Pessoas
 
 | Quem consome | Método que precisa | Dono | Status |
 |---|---|---|---|
-| B (Empréstimo) | `Cliente::existe()` | A | 🔜 a criar |
-| B (Empréstimo) | `Filme::buscarPorId()` | A | ✅ pronto |
-| A (Relatórios) | `Emprestimo::listarPorCliente()` / `buscarPorId()` | B | 🔜 a criar |
-| A (Relatórios) | `Devolucao::registrar()` | B | 🔜 a criar |
-| A/B (Empréstimo) | `Dvd::verificarDisponibilidade()` / `buscarDisponivelPorFilme()` | B | ✅ / 🔜 |
+| C (Empréstimo) | `Cliente::existe()` | Pessoa A | 🔜 a criar |
+| C (Empréstimo) | `Filme::buscarPorId()` | Pessoa B | ✅ pronto |
+| A (Relatórios) | `Emprestimo::listarPorCliente()` / `buscarPorId()` | Pessoa C | 🔜 a criar |
+| A (Relatórios) | `Devolucao::registrar()` | Pessoa C | 🔜 a criar |
+| C (Empréstimo) | `Dvd::verificarDisponibilidade()` / `buscarDisponivelPorFilme()` | Pessoa C | ✅ / 🔜 |
+| B | `Filme::listarAtores()` (p/ vínculo ator) | Pessoa B | ✅ pronto |
+| — | pivot `atores_filme` (CRUD do vínculo) | Pessoa B | 🔜 a criar |
 
 ---
 
 ## Antes de codar
 
-1. Revisem esta lista os **dois** juntos e ajustem o que não fizer sentido pro `locadora.sql`.
+1. Revisem esta lista os **três** juntos e ajustem o que não fizer sentido pro `locadora.sql`.
 2. Qualquer mudança de assinatura depois de combinada precisa ser avisada no grupo antes de dar push.
 3. Quem depende de um método que ainda não foi implementado pode criar uma versão "fake" (retornando um array fixo) só pra não travar o próprio desenvolvimento, e trocar depois pela versão real.
 4. **Não recrie métodos já prontos** (seção "✅ Já implementado") com outro nome ou em outra classe — use os existentes.
