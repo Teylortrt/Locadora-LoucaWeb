@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../src/Models/Auth.php';
+require_once __DIR__ . '/../src/Models/EmprestimoModel.php';
+require_once __DIR__ . '/../src/Controllers/EmprestimoController.php';
 
 $auth = new Auth();
 $auth->exigirLogin();
@@ -44,6 +46,11 @@ $usuario = $auth->usuario();
             <h2>Olá, <?= htmlspecialchars($usuario['nome']) ?></h2>
             <p class="descricao">Use o menu para acessar as operações da locadora.</p>
         </section>
+
+        <!-- Container de Emprestimos rápidos -->
+        <div class="container" >
+            
+        </div>
     </main>
 
     
