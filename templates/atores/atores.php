@@ -28,7 +28,7 @@ $listarAtores = $atorModel->listarTodos()
                 <span>Locadora</span>
                 <h1>LoucaWeb</h1>
             </div>
-            <form class="form-sair" method="GET" action="../filmes/painel.php">
+            <form class="form-sair" method="GET" action="../filmes/filmes.php">
                 <button type="submit" class="button">Voltar</button>
             </form>
         </div>

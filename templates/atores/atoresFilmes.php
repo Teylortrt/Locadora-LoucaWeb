@@ -10,8 +10,12 @@ $atorModel = new Ator($conn);
 
 $id = (int) ($_GET['id'] ?? 0);
 
-$listarFilmesAtuados = $atorModel->listarFilmeAtuado($id)
+$listarFilmesAtuados = $atorModel->listarFilmeAtuado($id);
+$ator = $atorModel->listarAtorPorID($id);
 
+foreach($ator as $nome):
+ $ator = ($nome['nome']);
+endforeach
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -37,21 +41,24 @@ $listarFilmesAtuados = $atorModel->listarFilmeAtuado($id)
     </header>
 <body>
     <main class="container conteudo">
-        <header class="cabecalho-pagina"><h2><h2>Filmes registrados</h2><p>Relação de filmes cadastrados na locadora.</p></header>
+        <header class="cabecalho-pagina"><h2><h2>Filmes registrados</h2><p>Relação de filmes de <?= htmlspecialchars($nome['nome']) ?> cadastrados na locadora.</p></header>
         <section class="painel-card">
-            <table class="u-full-width"><thead><tr><th>titulo</th><th class="center">Personagem</th></tr></thead><tbody>
+            <table class="u-full-width"><thead><tr><th>titulo</th><th class="center">Personagem</th><th>Opções</th></thead><tbody>
             <?php foreach ($listarFilmesAtuados as $filmes) : ?>
                 <tr>
                     <td><?= htmlspecialchars($filmes['titulo']) ?></td>
+                    <td><?= htmlspecialchars($filmes['personagem']) ?> </td>
                     <td class="acao-coluna">
-
+                        <form class="form-cadastro" method="GET" action="editarfilmes.php">
+                            <input type="hidden" name="editar" value="editar">
+                            <button type="submit" class="button button-primary">Editar</button>
+                        </form>
                     </td>
-                </tr>
                 </tr>
             <?php endforeach; ?>
             </tbody></table>
         </section>
-        <nav class="navegacao"><a href="cadastroAtor.php">Cadastrar ator</a>
+        <nav class="navegacao"><a href="cadastroFilmeAtor.php">Cadastrar filme deste ator</a>
     </main>
 </body>
 </html>

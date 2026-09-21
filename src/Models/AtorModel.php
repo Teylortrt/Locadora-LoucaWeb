@@ -32,4 +32,15 @@ class Ator
 
         return $stmt->fetchAll();
     }
+
+    public function listarAtorPorID(int $id) : array
+    {
+        $sql = "SELECT nome FROM atores WHERE id = :id  ORDER BY nome";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+
+    }
 }
