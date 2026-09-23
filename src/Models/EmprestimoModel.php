@@ -7,4 +7,15 @@ Class EmprestimoModel
     {
         $this->db = $conexao;
     }
+
+    public function visualizarEmpréstimos()
+    {
+
+    }
+
+    public function calcularAtraso()
+    {
+
+    }
+    
 }

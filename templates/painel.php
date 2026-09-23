@@ -28,8 +28,12 @@ $usuario = $auth->usuario();
             <button type="submit" class="botao botao-cadastro">Cadastro</button>
         </form>
 
-        <form class="form-catalogo" method="GET" action="/Locadora-LoucaWeb/templates/filmes/filmes.php">
+        <form class="form-catalogo" method="GET" action="filmes/filmes.php">
             <button type="submit" class="botao botao-catalogo">Catálogo</button>
+        </form>
+
+        <form class="form-cadastro" method="GET" action="emprestimos/emprestimos.php">
+            <button type="submit" class="botao botao-cadastro">Emprestimos</button>
         </form>
         
         <div class="acoes-topo">
@@ -47,10 +51,17 @@ $usuario = $auth->usuario();
             <p class="descricao">Use o menu para acessar as operações da locadora.</p>
         </section>
 
-        <!-- Container de Emprestimos rápidos -->
-        <div class="container" >
-            
-        </div>
+        <!-- Aréa de emprestimos rápidos -->
+        <section class="painel-card">
+                <header class="cabecalho-pagina"><h2>Realizar um emprestimo</h2><p>Preencha os dados para fazer um empréstimo</p></header>
+                <form method="POST">
+                    <div class="row"><div class="twelve columns"><label for="nome">Nome do cliente</label><input class="u-full-width" type="text" id="nome" name="nome" required></div>
+                    <div class="twelve columns"><label for="sobrenome">Nome do filme</label><input class="u-full-width" type="text" id="sobrenome" name="sobrenome" required></div></div>
+                    <div class="twelve columns"><label for="endereco">Tempo de locação</label><input class="u-full-width" type="text" id="endereco" name="endereco" required></div></div>
+                    <button type="submit" class="button-primary">Realizar emprestimo</button>
+                </form>
+        </section>
+
     </main>
 
     
