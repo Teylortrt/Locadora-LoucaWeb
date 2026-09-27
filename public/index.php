@@ -111,6 +111,36 @@ if ($method === 'POST' && $caminho === '/cadastrar') {
     exit;
 }
 
+if ($method === 'GET' && $caminho === '/clientes') {
+    (new \App\Controllers\ClienteController())->listar();
+    exit;
+}
+
+if ($method === 'POST' && $caminho === '/clientes') {
+    (new \App\Controllers\ClienteController())->cadastrar();
+    exit;
+}
+
+if (preg_match('#^/clientes/(\d+)$#', $caminho, $matches)) {
+    $controller = new \App\Controllers\ClienteController();
+    $id = (int) $matches[1];
+
+    if ($method === 'GET') {
+        $controller->buscarPorId($id);
+        exit;
+    }
+
+    if ($method === 'PUT') {
+        $controller->atualizar($id);
+        exit;
+    }
+
+    if ($method === 'DELETE') {
+        $controller->deletar($id);
+        exit;
+    }
+}
+
 if ($method === 'POST' && $caminho === '/login-web') {
     require_once __DIR__ . '/../src/Models/Auth.php';
 
