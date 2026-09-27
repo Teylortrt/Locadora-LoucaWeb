@@ -67,7 +67,7 @@ class DevolucaoModel
             'valor_original_filmes' => $valorOriginal,
             'dias_atraso' => $diasAtrasoMax,
             'valor_multa' => $multaTotal,
-            'valor_total_pagar' => $multaTotal // O original já foi pago na retirada
+            'valor_total_pagar' => $valorOriginal + $multaTotal
         ];
     }
 

@@ -60,15 +60,24 @@ $erroMsg = $_GET['erro'] ?? '';
     <link rel="stylesheet" href="../../public/css/style.css">
 </head>
 <body>
+    <header class="topo">
+      <div class="container">
+        <div class="marca">
+            <h1>LoucaWeb</h1>
+        </div>
+
+        <div class="acoes-topo">    
+            <form class="form-sair" method="GET" action="../painel.php">
+                <button type="submit" class="button">Voltar</button>
+            </form>
+        </div> 
+    </header>
+
     <main class="container conteudo">
         <header class="cabecalho-pagina">
             <h2>Gerenciar Empréstimos</h2>
             <p>Consulte locações, busque por clientes ou filmes e registre devoluções.</p>
         </header>
-
-        <nav class="navegacao">
-            <a href="../painel.php">Voltar ao painel</a>
-        </nav>
 
         <?php if ($sucessoMsg): ?>
             <div style="color: green; margin-bottom: 15px; font-weight: bold;"><?= htmlspecialchars($sucessoMsg) ?></div>
@@ -84,13 +93,13 @@ $erroMsg = $_GET['erro'] ?? '';
                     <p style="color:red;"><?= htmlspecialchars($erroDevolucao) ?></p>
                     <a href="emprestimos.php" class="button">Voltar</a>
                 <?php else: ?>
-                    <p><strong>Detalhes da Locação:</strong><br>Valor Original: R$ <?= number_format($dadosDevolucao['valor_original'], 2, ',', '.') ?></p>
-                    <?php if ($dadosDevolucao['multa_total'] > 0): ?>
-                        <p style="color: red;"><strong>Atraso detectado!</strong><br>Multa: R$ <?= number_format($dadosDevolucao['multa_total'], 2, ',', '.') ?></p>
+                    <p><strong>Detalhes da Locação:</strong><br>Valor Original: R$ <?= number_format($dadosDevolucao['valor_original_filmes'], 2, ',', '.') ?></p>
+                    <?php if ($dadosDevolucao['valor_multa'] > 0): ?>
+                        <p style="color: red;"><strong>Atraso detectado!</strong><br>Multa: R$ <?= number_format($dadosDevolucao['valor_multa'], 2, ',', '.') ?></p>
                     <?php else: ?>
                         <p style="color: green;">Devolução no prazo. Nenhuma multa aplicada.</p>
                     <?php endif; ?>
-                    <p><strong>Total a Pagar: R$ <?= number_format($dadosDevolucao['valor_total_devido'], 2, ',', '.') ?></strong></p>
+                    <p><strong>Total a Pagar: R$ <?= number_format($dadosDevolucao['valor_total_pagar'], 2, ',', '.') ?></strong></p>
                     
                     <form method="POST" action="../../public/devolucoes" style="display:inline-block; margin-right: 10px;">
                         <input type="hidden" name="id_emprestimo" value="<?= htmlspecialchars($calcularDevolucao) ?>">
