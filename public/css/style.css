@@ -38,6 +38,7 @@ body { background: #f7f7f7; }
 .lista-selecionados li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem 0; border-bottom: 1px solid #eee; }
 .lista-selecionados li:last-child { border-bottom: 0; }
 .lista-selecionados li.vazio { color: #888; font-style: italic; }
+.lista-selecionados .copias-disponiveis { display: block; color: #1e7e34; font-size: 1.2rem; font-style: normal; }
 .lista-selecionados .remover-dvd { margin-bottom: 0; padding: .2rem 1rem; font-size: 1.2rem; background: transparent; color: #c0392b; border: 1px solid #c0392b; }
 .lista-selecionados .remover-dvd:hover { background: #c0392b; color: #fff; }
 .linha-filme { display: flex; align-items: flex-end; }

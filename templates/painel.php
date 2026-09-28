@@ -1,7 +1,9 @@
 <?php
-require_once __DIR__ . '/../src/Database/Connection.php';
+require_once __DIR__ . '/../config/conexao.php';
 require_once __DIR__ . '/../src/Models/Auth.php';
 require_once __DIR__ . '/../src/Models/Cliente.php';
+require_once __DIR__ . '/../src/Models/Dvd.php';
+require_once __DIR__ . '/../src/Models/PainelEmprestimo.php';
 
 $auth = new Auth();
 $auth->exigirLogin();
@@ -13,82 +15,45 @@ $documentRoot     = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']), '/'
 $raizApp          = '/' . trim(str_replace($documentRoot, '', $diretorioProjeto), '/');
 $urlPainel        = $raizApp . '/templates/painel.php';
 
-global $conn;
-
-// Empréstimo rápido: o cliente é escolhido por autocomplete; os DVDs são
-// adicionados um a um (select + botão "Adicionar") e ficam na sessão até a
-// confirmação. Confirmação POSTa para /public/emprestimos (EmprestimoController),
-// que valida `id_cliente`, `dvds_ids[]` e `prazo_dias` e redireciona de volta
-// com ?sucesso= ou ?erro=.
-
-// Estado em andamento.
-if (!isset($_SESSION['emprestimo_dvds']) || !is_array($_SESSION['emprestimo_dvds'])) {
-    $_SESSION['emprestimo_dvds'] = [];
-}
-$clienteId = isset($_SESSION['emprestimo_cliente']) ? (int) $_SESSION['emprestimo_cliente'] : 0;
+// Toda a lógica do empréstimo rápido (filmes disponíveis, DVDs escolhidos,
+// cliente e limpeza após a confirmação) fica no model; aqui só o formulário.
+$painel = new PainelEmprestimo(new Dvd($conn), new \App\Models\Cliente($conn));
 
 // Ações self-POST (Adicionar/Remover DVD) — nenhum JS envolvido.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['adicionar_dvd'])) {
-        $dvdId = (int) ($_POST['dvd_id'] ?? 0);
-        if ($dvdId > 0) {
-            $stmt = $conn->prepare(
-                'SELECT d.id, f.titulo FROM dvds d JOIN filmes f ON f.id = d.id_filme WHERE d.id = :id'
-            );
-            $stmt->execute(['id' => $dvdId]);
-            $dvd = $stmt->fetch();
-            if ($dvd) {
-                $_SESSION['emprestimo_dvds'][$dvd['id']] = $dvd['titulo'];
-            }
-        }
+        $painel->adicionarDvd((int) ($_POST['dvd_id'] ?? 0));
     }
 
     if (isset($_POST['remover_dvd'])) {
-        unset($_SESSION['emprestimo_dvds'][(int) $_POST['remover_dvd']]);
+        $painel->removerDvd((int) $_POST['remover_dvd']);
     }
 
     if (isset($_POST['id_cliente'])) {
-        $clienteId = (int) $_POST['id_cliente'];
-        $_SESSION['emprestimo_cliente'] = $clienteId;
+        $painel->definirCliente((int) $_POST['id_cliente']);
     }
 
     header('Location: ' . $urlPainel);
     exit;
 }
 
-// Empréstimo confirmado com sucesso: limpa o estado em andamento.
+// Empréstimo confirmado com sucesso: limpa o rascunho.
 if (isset($_GET['sucesso'])) {
-    $_SESSION['emprestimo_dvds']   = [];
-    $_SESSION['emprestimo_cliente'] = 0;
-    $clienteId = 0;
+    $painel->limpar();
 }
 
-// Nome do cliente escolhido (para repopular o campo do autocomplete ao
-// recarregar a página após Adicionar/Remover um DVD).
-$clienteLabel = '';
-if ($clienteId > 0) {
-    $stmt = $conn->prepare('SELECT nome, sobrenome FROM clientes WHERE id = :id');
-    $stmt->execute(['id' => $clienteId]);
-    $cliente = $stmt->fetch();
-    if ($cliente) {
-        $clienteLabel = $cliente['nome'] . ' ' . $cliente['sobrenome'];
-    } else {
-        $clienteId = 0;
-        unset($_SESSION['emprestimo_cliente']);
-    }
-}
+$dvdOpcoes        = $painel->opcoesDeFilmes();
+$dvdsSelecionados = $painel->dvds();
+$clienteId        = $painel->clienteId();
+$clienteLabel     = $painel->clienteLabel();
 
-// Lista de DVDs disponíveis para o select.
-$stmt = $conn->prepare(
-    'SELECT d.id, f.titulo FROM dvds d JOIN filmes f ON f.id = d.id_filme
-      WHERE d.quantidade > 0 ORDER BY f.titulo'
-);
-$stmt->execute();
-$dvdOpcoes = $stmt->fetchAll();
-
-$dvdsSelecionados = $_SESSION['emprestimo_dvds'];
 $sucessoEmprestimo = $_GET['sucesso'] ?? '';
 $erroEmprestimo    = $_GET['erro'] ?? '';
+
+// Texto de disponibilidade, usado no select e na lista de selecionados.
+$rotuloCopias = static fn (int $copias): string => $copias > 0
+    ? $copias . ($copias === 1 ? ' cópia disponível' : ' cópias disponíveis')
+    : 'sem cópias disponíveis';
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -137,7 +102,7 @@ $erroEmprestimo    = $_GET['erro'] ?? '';
         <!-- Empréstimo rápido: cliente por autocomplete, filmes por select + Adicionar -->
         <section class="painel-card">
             <header class="cabecalho-pagina">
-                <h2>Realizar um Empréstimo Rápido</h2>
+                <h2>Realizar um Empréstimo</h2>
                 <p>Escolha o cliente, selecione os filmes e clique em Adicionar.</p>
             </header>
 
@@ -178,7 +143,10 @@ $erroEmprestimo    = $_GET['erro'] ?? '';
                         <select class="u-full-width" id="dvd_id" name="dvd_id">
                             <option value="">Selecione um filme...</option>
                             <?php foreach ($dvdOpcoes as $dvd): ?>
-                                <option value="<?= (int) $dvd['id'] ?>"><?= htmlspecialchars($dvd['titulo']) ?></option>
+                                <?php $disponiveis = (int) $dvd['disponivel']; ?>
+                                <option value="<?= (int) $dvd['id'] ?>" <?= $disponiveis > 0 ? '' : 'disabled' ?>>
+                                    <?= htmlspecialchars($dvd['titulo']) ?> — <?= $rotuloCopias($disponiveis) ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -195,9 +163,12 @@ $erroEmprestimo    = $_GET['erro'] ?? '';
                             <?php if (!$dvdsSelecionados): ?>
                                 <li class="vazio">Nenhum filme selecionado.</li>
                             <?php else: ?>
-                                <?php foreach ($dvdsSelecionados as $dvdId => $titulo): ?>
+                                <?php foreach ($dvdsSelecionados as $dvdId => $dvd): ?>
                                     <li>
-                                        <span><?= htmlspecialchars($titulo) ?></span>
+                                        <span>
+                                            <?= htmlspecialchars($dvd['titulo']) ?>
+                                            <em class="copias-disponiveis"><?= $rotuloCopias((int) $dvd['disponivel']) ?></em>
+                                        </span>
                                         <input type="hidden" name="dvds_ids[]" value="<?= (int) $dvdId ?>">
                                         <button type="submit" class="button botao-excluir remover-dvd"
                                                 name="remover_dvd" value="<?= (int) $dvdId ?>"
