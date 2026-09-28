@@ -59,23 +59,24 @@ public function buscarDisponivelPorFilme(int $idFilme): array|null
 
 ## Empréstimo (Pessoa C) → usado por Devolução e Relatórios (Pessoa C / Pessoa A)
 
-Tabela: `emprestimos` (`id`, `data`, `id_cliente`)
+Tabela: `emprestimos` (`id`, `data`, `data_prevista`, `id_cliente`)
 Itens do empréstimo em `filmes_emprestimo` (`id`, `id_dvd`, `id_emprestimo`).
 
-O schema **não possui** `data_prevista` nem `status`. A "previsão" e o estado ativo/atrasado devem ser calculados a partir da `data` do empréstimo e da existência (ou não) de devolução registrada em `devolucoes`.
+`data_prevista` é armazenada para definir o prazo de entrega de cada empréstimo e permitir identificar se ele está em dia ou atrasado. O estado não é persistido em uma coluna `status`: é calculado comparando `data_prevista` com a data atual e verificando se ainda há itens sem devolução registrada em `filmes_devolucao`. Registros antigos com `data_prevista` nula usam, na consulta atual de atraso, o prazo de compatibilidade de 7 dias após `data`.
 
 ```php
 public function buscarPorId(int $id): array|null
-// retorna: ['id' => 1, 'id_cliente' => 5, 'data' => '2026-08-20 14:00:00'] ou null
+// retorna: ['id' => 1, 'id_cliente' => 5, 'data' => '2026-08-20 14:00:00',
+//           'data_prevista' => '2026-08-21 14:00:00'] ou null
 
 public function listarPorCliente(int $idCliente): array
 // retorna: lista de empréstimos (mesmo formato acima) daquele cliente,
 // em ordem decrescente de `data`
 
 public function estaAtrasado(int $idEmprestimo): bool
-// true se ainda não houve devolução registrada e o empréstimo está além
-// do prazo padrão (ex.: 7 dias corridos a partir de `data`)
-// Obs.: ajustar a regra de prazo em conjunto com o grupo e registrar em `MultaService`
+// true se a data atual passou de `data_prevista` e há item do empréstimo
+// sem devolução registrada. Para data_prevista nula, a consulta atual usa
+// como fallback 7 dias corridos a partir de `data`.
 ```
 
 ---
