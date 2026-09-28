@@ -93,17 +93,11 @@ if ($genero !== '') {
                 <h1>LoucaWeb</h1>
             </div>
 
-            <form class="form-cadastro" method="GET" action="cadastrarFilme.php">
-                <button type="submit" class="button button-primary">Adicionar Filmes</button>
-            </form>
-
-            <form class="form-cadastro" method="GET" action="../atores/atores.php">
-                <button type="submit" class="button button-primary">Ver atores</button>
-            </form>
-
-            <form class="form-sair" method="GET" action="../painel.php">
-                <button type="submit" class="button">Voltar</button>
-            </form>
+            <nav class="acoes-catalogo" aria-label="Navegação do catálogo">
+                <a class="button button-primary" href="cadastrarFilme.php">Adicionar filme</a>
+                <a class="button" href="../atores/atores.php">Ver atores</a>
+                <a class="button" href="../painel.php">Voltar ao painel</a>
+            </nav>
         </div>
     </header>
 

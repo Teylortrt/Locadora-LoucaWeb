@@ -22,19 +22,13 @@ $usuario = $auth->usuario();
         <div class="marca">
             <h1>LoucaWeb</h1>
         </div>
-        <form class="form-cadastro" method="GET" action="cadastro.php">
-            <button type="submit" class="botao botao-cadastro">Cadastro</button>
-        </form>
-
-        <form class="form-catalogo" method="GET" action="/Locadora-LoucaWeb/templates/filmes/filmes.php">
-            <button type="submit" class="botao botao-catalogo">Catálogo</button>
-        </form>
-        
-        <div class="acoes-topo">
+        <nav class="botoes-painel" aria-label="Navegação principal">
+            <a class="button" href="filmes/filmes.php">Catálogo</a>
+            <a class="button" href="clientes/clientes.php">Clientes</a>
             <form class="form-sair" method="POST" action="../public/logout-web">
                 <button type="submit" class="button botao-sair">Sair</button>
             </form>
-        </div>
+        </nav>
       </div>
     </header>
 

@@ -1,5 +1,8 @@
 <?php
-require_once __DIR__ . '/../config/conexao.php';
+require_once __DIR__ . '/../../config/conexao.php';
+require_once __DIR__ . '/../../src/Models/Auth.php';
+$auth = new Auth();
+$auth->exigirLogin();
 
 $id = $_GET['id'];
 
@@ -50,11 +53,14 @@ $cliente = $stmt->fetch(PDO::FETCH_ASSOC);
     <main class="container conteudo"><div class="row"><section class="eight columns offset-by-two painel-card">
         <header class="cabecalho-pagina"><h2>Editar cliente</h2><p>Atualize as informações de cadastro.</p></header>
         <form method="POST">
-            <div class="row"><div class="six columns"><label for="nome">Nome</label><input class="u-full-width" type="text" id="nome" name="nome" value="<?php echo htmlspecialchars($cliente['nome']); ?>" required></div><div class="six columns"><label for="sobrenome">Sobrenome</label><input class="u-full-width" type="text" id="sobrenome" name="sobrenome" value="<?php echo htmlspecialchars($cliente['sobrenome']); ?>" required></div></div>
-            <div class="row"><div class="six columns"><label for="telefone">Telefone</label><input class="u-full-width" type="text" id="telefone" name="telefone" value="<?php echo htmlspecialchars($cliente['telefone']); ?>" required></div><div class="six columns"><label for="endereco">Endereço</label><input class="u-full-width" type="text" id="endereco" name="endereco" value="<?php echo htmlspecialchars($cliente['endereco']); ?>" required></div></div>
-            <button type="submit" class="button-primary">Salvar alterações</button>
+            <div class="row"><div class="six columns"><label for="nome">Nome</label><input class="u-full-width" type="text" id="nome" name="nome" value="<?php echo htmlspecialchars($cliente['nome']); ?>" required></div><div class="six columns">
+            <div class="six columns"><label for="sobrenome">Sobrenome</label><input class="u-full-width" type="text" id="sobrenome" name="sobrenome" value="<?php echo htmlspecialchars($cliente['sobrenome']); ?>" required></div></div>
+            <div class="row"><div class="six columns"><label for="email">Email</label><input class="u-full-width" type="email" id="email" name="email" value="<?php echo htmlspecialchars($cliente['email']); ?>" required></div></div>
+            <div class="row"><div class="six columns"><label for="telefone">Telefone</label><input class="u-full-width" type="text" id="telefone" name="telefone" value="<?php echo htmlspecialchars($cliente['telefone']); ?>" required></div><div class="six columns">
+            <div class="six columns"><label for="endereco">Endereço</label><input class="u-full-width" type="text" id="endereco" name="endereco" value="<?php echo htmlspecialchars($cliente['endereco']); ?>" required></div></div>        
+<button type="submit" class="button-primary">Salvar alterações</button>
         </form>
-        <nav class="navegacao"><a href="tabelaclientes.php">Voltar à lista de clientes</a></nav>
+        <nav class="navegacao"><a href="tabelaclientes.php">Voltar à lista de clientes</a> &nbsp;·&nbsp; <a href="../painel.php">Voltar ao painel</a></nav>
     </section></div></main>
 </body>
 </html>

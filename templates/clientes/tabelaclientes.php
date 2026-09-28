@@ -1,8 +1,7 @@
 <?php
-require_once __DIR__ . '/../src/Models/Auth.php';
-require_once __DIR__ . '/../src/Models/cliente.php';
-require_once __DIR__ . '/../src/Controllers/ClienteController.php';
-// 3. Instancia a autenticação usando a conexão carregada pelo modelo
+require_once __DIR__ . '/../../config/conexao.php';
+require_once __DIR__ . '/../../src/Models/Auth.php';
+require_once __DIR__ . '/../../src/Models/cliente.php';
 $auth = new Auth();
 $auth->exigirLogin();
 
@@ -26,11 +25,15 @@ $listaDeClientes = $clienteModel->listarTodos();
     <main class="container conteudo">
         <header class="cabecalho-pagina"><h2>Clientes registrados</h2><p>Relação de clientes cadastrados na locadora.</p></header>
         <section class="painel-card">
-            <table class="u-full-width"><thead><tr><th>Nome</th><th>Sobrenome</th><th class="acao-coluna">Ações</th></tr></thead><tbody>
+            <table class="u-full-width"><thead><tr><th>Nome</th><th>Sobrenome</th><th>Email</th><th>Telefone</th><th>Endereço</th></th><th class="acao-coluna">Ações</th></tr></thead><tbody>
             <?php foreach ($listaDeClientes as $cliente) : ?>
                 <tr>
                     <td><?= htmlspecialchars($cliente['nome']) ?></td>
                     <td><?= htmlspecialchars($cliente['sobrenome']) ?></td>
+                    <td><?= htmlspecialchars($cliente['email']) ?></td>
+                    <td><?= htmlspecialchars($cliente['telefone']) ?></td>
+                    <td><?= htmlspecialchars($cliente['endereco']) ?></td>
+
                     <td class="acao-coluna">
                         <form class="form-excluir" method="GET" action="../src/Controllers/excluirclientescontroller.php">
                             <input type="hidden" name="id" value="<?= (int) $cliente['id'] ?>">
