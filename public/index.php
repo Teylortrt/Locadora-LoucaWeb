@@ -56,16 +56,6 @@ spl_autoload_register(function ($classe) {
     }
 });
 
-if ($method === 'GET' && $caminho === '/filmes') {
-    require_once __DIR__ . '/../config/conexao.php';
-    require_once __DIR__ . '/../src/Models/Filmes.php';
-
-    $filmes = new Filmes($conn);
-
-    echo json_encode($filmes->listarTodos(), JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
 if ($method === 'GET' && preg_match('#^/filmes/(\d+)$#', $caminho, $matches)) {
     require_once __DIR__ . '/../config/conexao.php';
     require_once __DIR__ . '/../src/Models/Filmes.php';
@@ -99,16 +89,30 @@ if ($method === 'GET' && preg_match('#^/filmes/(\d+)$#', $caminho, $matches)) {
     exit;
 }
 
-if ($method === 'POST' && $caminho === '/login') {
-    $controller = new \App\Controllers\AuthController();
-    $controller->login();
-    exit;
-}
+if ($method === 'GET' && $caminho === '/clientes') {
+    // Busca por nome/sobrenome no autocomplete do painel (?q=).
+    if (isset($_GET['q'])) {
+        require_once __DIR__ . '/../config/conexao.php';
 
-if ($method === 'POST' && $caminho === '/cadastrar') {
-    $controller = new \App\Controllers\AuthController();
-    $controller->cadastrar();
-    exit;
+        $termo = '%' . $_GET['q'] . '%';
+        $stmt = $conn->prepare(
+            "SELECT id, nome, sobrenome, telefone FROM clientes
+              WHERE CONCAT(nome, ' ', sobrenome) LIKE :t
+              ORDER BY nome, sobrenome LIMIT 12"
+        );
+        $stmt->bindValue(':t', $termo, PDO::PARAM_STR);
+        $stmt->execute();
+
+        http_response_code(200);
+        echo json_encode(array_map(function (array $c) {
+            return [
+                'id'    => (int) $c['id'],
+                'label' => $c['nome'] . ' ' . $c['sobrenome'],
+                'sub'   => $c['telefone'],
+            ];
+        }, $stmt->fetchAll()), JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 }
 
 if ($method === 'POST' && $caminho === '/login-web') {
@@ -134,6 +138,20 @@ if ($method === 'POST' && $caminho === '/logout-web') {
     $auth->sair();
 
     header('Location: ' . $raizApp . '/templates/login.php');
+    exit;
+}
+
+// --- ROTAS DE EMPRÉSTIMOS ---
+if ($method === 'POST' && $caminho === '/emprestimos') {
+    require_once __DIR__ . '/../src/Controllers/EmprestimoController.php';
+    (new EmprestimoController())->criarEmprestimo();
+    exit;
+}
+
+// --- ROTAS DE DEVOLUÇÕES ---
+if ($method === 'POST' && $caminho === '/devolucoes') {
+    require_once __DIR__ . '/../src/Controllers/DevolucaoController.php';
+    (new DevolucaoController())->registrarDevolucao();
     exit;
 }
 
