@@ -28,7 +28,7 @@ class DevolucaoModel
                 d.id AS id_dvd,
                 f.valor AS valor_filme,
                 e.data AS data_emprestimo,
-                DATEDIFF(NOW(), DATE_ADD(e.data, INTERVAL 7 DAY)) AS dias_atraso
+                CEIL(TIMESTAMPDIFF(SECOND, COALESCE(e.data_prevista, DATE_ADD(e.data, INTERVAL 7 DAY)), NOW()) / 86400) AS dias_atraso
             FROM filmes_emprestimo fe
             JOIN emprestimos e ON fe.id_emprestimo = e.id
             JOIN dvds d ON fe.id_dvd = d.id
@@ -48,21 +48,19 @@ class DevolucaoModel
         }
 
         $valorOriginal = 0;
-        $multaTotal = 0;
         $diasAtrasoMax = 0;
 
-        $multaPorDia = 2.00; // Regra de negócio: R$ 2,00 por dia de atraso por filme
+        $multaPorDia = 2.00; // Regra de negócio: R$ 2,00 por dia de atraso (geral, e não por filme)
 
         foreach ($itens as $item) {
             $valorOriginal += (float) $item['valor_filme'];
             $atraso = (int) $item['dias_atraso'];
-            if ($atraso > 0) {
-                $multaTotal += ($atraso * $multaPorDia);
-                if ($atraso > $diasAtrasoMax) {
-                    $diasAtrasoMax = $atraso;
-                }
+            if ($atraso > $diasAtrasoMax) {
+                $diasAtrasoMax = $atraso;
             }
         }
+
+        $multaTotal = $diasAtrasoMax * $multaPorDia;
 
         return [
             'itens_validos' => $itens,
@@ -94,10 +92,6 @@ class DevolucaoModel
                 // 3. Registrar na tabela filmes_devolucao
                 $stmt = $this->db->prepare('INSERT INTO filmes_devolucao (id_devolucao, id_filme_emprestimo) VALUES (?, ?)');
                 $stmt->execute([$idDevolucao, $item['id_filme_emprestimo']]);
-
-                // 4. Aumentar a disponibilidade (devolver o dvd)
-                $stmt = $this->db->prepare('UPDATE dvds SET quantidade = quantidade + 1 WHERE id = ?');
-                $stmt->execute([$item['id_dvd']]);
             }
 
             $this->db->commit();
