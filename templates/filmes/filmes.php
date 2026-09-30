@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../src/Models/Filmes.php';
 
 $auth = new Auth();
 $auth->exigirLogin();
+$usuario = $auth->usuario();
 
 // Calcula a raiz da aplicação para o JavaScript montar a URL da API (GET /filmes/{id}).
 $diretorioProjeto = str_replace('\\', '/', dirname(__DIR__, 2));
@@ -77,22 +78,28 @@ if ($genero !== '') {
                 <h1>LoucaWeb</h1>
             </div>
 
-            <form class="form-cadastro" method="GET" action="cadastrarFilme.php">
-                <button type="submit" class="button button-primary">Adicionar Filmes</button>
-            </form>
+            <?php if (($usuario['perfil'] ?? '') === 'cliente'): ?>
+                <form class="form-sair" method="POST" action="../../public/logout-web">
+                    <button type="submit" class="button">Sair</button>
+                </form>
+            <?php else: ?>
+                <form class="form-cadastro" method="GET" action="cadastrarFilme.php">
+                    <button type="submit" class="button button-primary">Adicionar Filmes</button>
+                </form>
 
-            <form class="form-cadastro" method="GET" action="../atores/atores.php">
-                <button type="submit" class="button button-primary">Ver atores</button>
-            </form>
+                <form class="form-cadastro" method="GET" action="../atores/atores.php">
+                    <button type="submit" class="button button-primary">Ver atores</button>
+                </form>
 
-            <form class="form-sair" method="GET" action="../painel.php">
-                <button type="submit" class="button">Voltar</button>
-            </form>
+                <form class="form-sair" method="GET" action="../painel.php">
+                    <button type="submit" class="button">Voltar</button>
+                </form>
+            <?php endif; ?>
         </div>
     </header>
 
     <main class="container conteudo catalogo-pagina">
-        <h1>Catálogo</h1>
+        <h1><?= ($usuario['perfil'] ?? '') === 'cliente' ? 'Filmes disponíveis' : 'Catálogo' ?></h1>
 
         <!-- =================================================== -->
         <!-- PARTE 6: BOTÕES DE GÊNERO -->

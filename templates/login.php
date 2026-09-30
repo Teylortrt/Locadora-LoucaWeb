@@ -4,7 +4,10 @@ require_once __DIR__ . '/../src/Models/Auth.php';
 $auth = new Auth();
 
 if ($auth->logado()) {
-    header('Location: painel.php');
+    $destino = ($auth->usuario()['perfil'] ?? '') === 'cliente'
+        ? 'filmes/filmes.php'
+        : 'painel.php';
+    header('Location: ' . $destino);
     exit;
 }
 
@@ -41,6 +44,8 @@ $erro = isset($_GET['erro']);
             </div>
 
             <button type="submit" class="button-primary u-full-width">Entrar</button>
+
+            <p><a href="cadastroCliente.php">Criar acesso de cliente</a></p>
 
             <?php if ($erro): ?>
                 <p class="mensagem erro">E-mail ou senha inválidos.</p>

@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../src/Models/EmprestimoModel.php';
 require_once __DIR__ . '/../../src/Models/DevolucaoModel.php';
 
 $auth = new Auth();
-$auth->exigirLogin();
+$auth->exigirEquipe();
 
 $emprestimoModel = new EmprestimoModel($conn);
 $devolucaoModel = new DevolucaoModel($conn);
@@ -67,6 +67,9 @@ $erroMsg = $_GET['erro'] ?? '';
         </div>
 
         <div class="acoes-topo">    
+            <form class="form-sair" method="GET" action="../relatorioEmprestimos.php">
+                <button type="submit" class="button">Relatório</button>
+            </form>
             <form class="form-sair" method="GET" action="../painel.php">
                 <button type="submit" class="button">Voltar</button>
             </form>
