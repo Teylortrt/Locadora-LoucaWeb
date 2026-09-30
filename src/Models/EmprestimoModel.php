@@ -12,7 +12,7 @@ class EmprestimoModel
     /**
      * US22 - Realizar empréstimo
      */
-    public function criarEmprestimo(int $idCliente, array $dvdsIds)
+    public function criarEmprestimo(int $idCliente, array $dvdsIds, int $prazoDias = 1)
     {
         try {
             $this->db->beginTransaction();
@@ -31,16 +31,14 @@ class EmprestimoModel
                 $valorTotal += (float)$dvd['valor'];
             }
 
-            // Registrar empréstimo
-            $stmt = $this->db->prepare('INSERT INTO emprestimos (id_cliente, data) VALUES (:id_cliente, NOW())');
-            $stmt->execute([':id_cliente' => $idCliente]);
+            // Registrar empréstimo com data_prevista
+            $stmt = $this->db->prepare('INSERT INTO emprestimos (id_cliente, data, data_prevista) VALUES (:id_cliente, NOW(), DATE_ADD(NOW(), INTERVAL :prazo DAY))');
+            $stmt->bindValue(':id_cliente', $idCliente, PDO::PARAM_INT);
+            $stmt->bindValue(':prazo', $prazoDias, PDO::PARAM_INT);
+            $stmt->execute();
             $idEmprestimo = $this->db->lastInsertId();
 
             foreach ($dvdsIds as $idDvd) {
-                // Diminuir disponibilidade
-                $stmt = $this->db->prepare('UPDATE dvds SET quantidade = quantidade - 1 WHERE id = :id_dvd');
-                $stmt->execute([':id_dvd' => $idDvd]);
-
                 // Registrar filmes do empréstimo
                 $stmt = $this->db->prepare('INSERT INTO filmes_emprestimo (id_dvd, id_emprestimo) VALUES (:id_dvd, :id_emprestimo)');
                 $stmt->execute([
@@ -68,12 +66,15 @@ class EmprestimoModel
                 e.data, 
                 c.nome AS cliente_nome, 
                 c.sobrenome AS cliente_sobrenome,
-                GROUP_CONCAT(f.titulo SEPARATOR ", ") AS filmes
+                GROUP_CONCAT(f.titulo SEPARATOR ", ") AS filmes,
+                GROUP_CONCAT(d.id SEPARATOR ",") AS dvds_ids
             FROM emprestimos e
             JOIN clientes c ON e.id_cliente = c.id
             JOIN filmes_emprestimo fe ON e.id = fe.id_emprestimo
             JOIN dvds d ON fe.id_dvd = d.id
             JOIN filmes f ON d.id_filme = f.id
+            LEFT JOIN filmes_devolucao fd ON fd.id_filme_emprestimo = fe.id
+            WHERE fd.id IS NULL
             GROUP BY e.id
             ORDER BY e.data DESC
         ';
@@ -94,7 +95,8 @@ class EmprestimoModel
             JOIN filmes_emprestimo fe ON e.id = fe.id_emprestimo
             JOIN dvds d ON fe.id_dvd = d.id
             JOIN filmes f ON d.id_filme = f.id
-            WHERE e.id_cliente = :id_cliente
+            LEFT JOIN filmes_devolucao fd ON fd.id_filme_emprestimo = fe.id
+            WHERE e.id_cliente = :id_cliente AND fd.id IS NULL
             GROUP BY e.id
             ORDER BY e.data DESC
         ';
@@ -117,17 +119,18 @@ class EmprestimoModel
             SELECT 
                 e.id, 
                 e.data,
-                DATEDIFF(NOW(), DATE_ADD(e.data, INTERVAL 7 DAY)) AS dias_atraso,
+                CEIL(TIMESTAMPDIFF(SECOND, COALESCE(e.data_prevista, DATE_ADD(e.data, INTERVAL 7 DAY)), NOW()) / 86400) AS dias_atraso,
                 c.nome AS cliente_nome, 
                 c.sobrenome AS cliente_sobrenome,
-                GROUP_CONCAT(f.titulo SEPARATOR ", ") AS filmes_pendentes
+                GROUP_CONCAT(f.titulo SEPARATOR ", ") AS filmes_pendentes,
+                GROUP_CONCAT(d.id SEPARATOR ",") AS dvds_ids
             FROM emprestimos e
             JOIN clientes c ON e.id_cliente = c.id
             JOIN filmes_emprestimo fe ON e.id = fe.id_emprestimo
             JOIN dvds d ON fe.id_dvd = d.id
             JOIN filmes f ON d.id_filme = f.id
             LEFT JOIN filmes_devolucao fd ON fd.id_filme_emprestimo = fe.id
-            WHERE DATE_ADD(e.data, INTERVAL 7 DAY) < NOW()
+            WHERE COALESCE(e.data_prevista, DATE_ADD(e.data, INTERVAL 7 DAY)) < NOW()
               AND fd.id IS NULL
             GROUP BY e.id
             ORDER BY dias_atraso DESC
