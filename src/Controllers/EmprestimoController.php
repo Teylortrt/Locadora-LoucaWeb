@@ -1,28 +1,23 @@
 <?php
-
-namespace App\Controllers;
-
-use PDO;
-use Exception;
-// Como EmprestimoModel ainda não tem namespace declarado, vamos incluí-lo se necessário,
-// mas o ideal seria usar require_once no index.php ou adicionar o namespace nele.
-// Para garantir, vamos fazer require_once aqui caso não tenha sido carregado.
 require_once __DIR__ . '/../Models/EmprestimoModel.php';
 require_once __DIR__ . '/../../config/conexao.php'; // Para pegar $conn caso precise, mas ideal é injetar
 
 class EmprestimoController 
 {
-    private \EmprestimoModel $emprestimoModel;
+    private EmprestimoModel $emprestimoModel;
 
     public function __construct() {
         global $conn; // Pegando a variável $conn do config/conexao.php
-        $this->emprestimoModel = new \EmprestimoModel($conn);
+        $this->emprestimoModel = new EmprestimoModel($conn);
     }
     
     public function criarEmprestimo()
     {
         try {
             $dados = json_decode(file_get_contents('php://input'), true);
+            if (empty($dados)) {
+                $dados = $_POST;
+            }
 
             if (!isset($dados['id_cliente']) || !isset($dados['dvds_ids']) || !is_array($dados['dvds_ids'])) {
                 http_response_code(400);
@@ -30,10 +25,19 @@ class EmprestimoController
                 return;
             }
 
+            $prazoDias = isset($dados['prazo_dias']) ? (int)$dados['prazo_dias'] : 1;
+
             $resultado = $this->emprestimoModel->criarEmprestimo(
                 (int)$dados['id_cliente'],
-                $dados['dvds_ids']
+                $dados['dvds_ids'],
+                $prazoDias
             );
+
+            // Se for requisição tradicional, redirecionar
+            if (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') !== false) {
+                header('Location: ../templates/painel.php?sucesso=Emprestimo+realizado');
+                exit;
+            }
 
             http_response_code(201);
             echo json_encode([
@@ -41,6 +45,10 @@ class EmprestimoController
                 'dados' => $resultado
             ]);
         } catch (Exception $e) {
+            if (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') !== false) {
+                header('Location: ../templates/painel.php?erro=' . urlencode($e->getMessage()));
+                exit;
+            }
             http_response_code(500);
             echo json_encode(['erro' => $e->getMessage()]);
         }
