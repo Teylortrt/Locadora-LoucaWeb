@@ -1,0 +1,75 @@
+erDiagram
+    GENEROS ||--o{ FILMES : classifica
+    FILMES ||--o{ DVDS : possui_copias
+    ATORES ||--o{ ATORES_FILME : participa
+    FILMES ||--o{ ATORES_FILME : possui_elenco
+    CLIENTES ||--o{ EMPRESTIMOS : realiza
+    EMPRESTIMOS ||--o{ FILMES_EMPRESTIMO : contem
+    DVDS ||--o{ FILMES_EMPRESTIMO : item_de
+    EMPRESTIMOS ||--o{ DEVOLUCOES : recebe
+    DEVOLUCOES ||--o{ FILMES_DEVOLUCAO : registra
+    FILMES_EMPRESTIMO ||--o{ FILMES_DEVOLUCAO : item_devolvido
+
+    GENEROS {
+        int id PK
+        varchar genero
+    }
+    FILMES {
+        int id PK
+        int id_genero FK
+        varchar titulo
+        decimal valor
+        varchar poster_url
+    }
+    ATORES {
+        int id PK
+        varchar nome
+    }
+    ATORES_FILME {
+        int id PK
+        int id_filme FK
+        int id_ator FK
+        varchar personagem
+    }
+    DVDS {
+        int id PK
+        int id_filme FK
+        int quantidade
+    }
+    CLIENTES {
+        int id PK
+        varchar nome
+        varchar sobrenome
+        varchar telefone
+        varchar endereco
+    }
+    EMPRESTIMOS {
+        int id PK
+        datetime data
+        datetime data_prevista
+        int id_cliente FK
+    }
+    FILMES_EMPRESTIMO {
+        int id PK
+        int id_dvd FK
+        int id_emprestimo FK
+    }
+    DEVOLUCOES {
+        int id PK
+        int id_emprestimo FK
+        datetime data
+    }
+    FILMES_DEVOLUCAO {
+        int id PK
+        int id_devolucao FK
+        int id_filme_emprestimo FK
+    }
+    USUARIOS {
+        int id PK
+        varchar nome
+        varchar email UK
+        varchar senha
+        enum perfil
+        boolean ativo
+        datetime criado_em
+    }

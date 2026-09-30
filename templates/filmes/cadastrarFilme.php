@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../src/Services/TmdbClient.php';
 
 // Exige autenticação
 $auth = new Auth();
-$auth->exigirLogin();
+$auth->exigirEquipe();
 
 // Garante que $conn existe antes de instanciar os Models/Controllers
 if (!isset($conn) || !($conn instanceof PDO)) {
