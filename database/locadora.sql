@@ -102,6 +102,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `locadora`.`emprestimos` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `data` DATETIME NOT NULL,
+  `data_prevista` DATETIME NULL DEFAULT NULL,
   `id_cliente` INT NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_emprestimos_1_idx` (`id_cliente` ASC),
