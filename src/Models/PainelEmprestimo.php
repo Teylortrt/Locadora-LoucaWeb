@@ -73,8 +73,8 @@ class PainelEmprestimo
     {
         $dvd = $idDvd > 0 ? $this->dvdModel->buscarComDisponibilidade($idDvd) : null;
 
-        if (!$dvd) {
-            return;
+        if (!$dvd || (int) $dvd['disponivel'] <= 0) {
+            return; // Bloqueia DVDs sem cópias livres
         }
 
         $this->dvds();
