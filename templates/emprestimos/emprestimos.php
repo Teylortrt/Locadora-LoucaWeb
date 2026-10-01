@@ -66,10 +66,12 @@ $erroMsg = $_GET['erro'] ?? '';
             <h1>LoucaWeb</h1>
         </div>
 
+        <form class="form-cadastro" method="GET" action="../relatorioEmprestimos.php">
+            <button type="submit" class="button">Relatório</button>
+        </form>
+        
         <div class="acoes-topo">    
-            <form class="form-sair" method="GET" action="../relatorioEmprestimos.php">
-                <button type="submit" class="button">Relatório</button>
-            </form>
+
             <form class="form-sair" method="GET" action="../painel.php">
                 <button type="submit" class="button">Voltar</button>
             </form>

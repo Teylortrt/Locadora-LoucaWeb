@@ -88,19 +88,9 @@ $rotuloCopias = static fn (int $copias): string => $copias > 0
             <button type="submit" class="botao botao-cadastro">Emprestimos</button>
         </form>
 
-        <form class="form-cadastro" method="GET" action="relatorioEmprestimos.php">
+        <form class="form-cadastro" method="GET" action="relatorio/relatorioEmprestimos.php">
             <button type="submit" class="botao botao-cadastro">Relatório</button>
         </form>
-
-        <form class="form-cadastro" method="GET" action="clientesAtrasados.php">
-            <button type="submit" class="botao botao-cadastro">Clientes atrasados</button>
-        </form>
-
-        <?php if (($usuario['perfil'] ?? '') === 'administrador'): ?>
-            <form class="form-cadastro" method="GET" action="filmesMaisAlugados.php">
-                <button type="submit" class="botao botao-cadastro">Filmes mais alugados</button>
-            </form>
-        <?php endif; ?>
 
         <div class="acoes-topo">
             <form class="form-sair" method="POST" action="../public/logout-web">

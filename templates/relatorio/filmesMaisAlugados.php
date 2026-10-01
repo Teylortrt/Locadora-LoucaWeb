@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/../src/Database/Connection.php';
-require_once __DIR__ . '/../src/Models/Auth.php';
-require_once __DIR__ . '/../src/Services/RelatorioService.php';
+require_once __DIR__ . '/../../src/Database/Connection.php';
+require_once __DIR__ . '/../../src/Models/Auth.php';
+require_once __DIR__ . '/../../src/Services/RelatorioService.php';
 
 $auth = new Auth();
 $auth->exigirPerfis(['administrador']);
@@ -20,9 +20,9 @@ $totalAlugueis = array_sum(array_map(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Filmes mais alugados — Locadora LoucaWeb</title>
     <link rel="icon" href="../image/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="../public/css/normalize.css">
-    <link rel="stylesheet" href="../public/css/skeleton.css">
-    <link rel="stylesheet" href="../public/css/style.css">
+    <link rel="stylesheet" href="../../public/css/normalize.css">
+    <link rel="stylesheet" href="../../public/css/skeleton.css">
+    <link rel="stylesheet" href="../../public/css/style.css">
     <style>
         .resumo-alugueis { display: flex; flex-wrap: wrap; gap: 3rem; margin: 0 0 2rem; }
         .resumo-alugueis strong { display: block; font-size: 2.2rem; }
@@ -41,8 +41,8 @@ $totalAlugueis = array_sum(array_map(
         <div class="container">
             <div class="marca"><h1>LoucaWeb</h1></div>
             <div class="acoes-topo">
-                <a class="button" href="filmes/filmes.php">Catálogo</a>
-                <a class="button" href="painel.php">Voltar ao painel</a>
+                <a class="button" href="../filmes/filmes.php">Catálogo</a>
+                <a class="button" href="../painel.php">Voltar ao painel</a>
             </div>
         </div>
     </header>

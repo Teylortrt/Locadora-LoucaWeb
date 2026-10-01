@@ -1,10 +1,11 @@
 <?php
-require_once __DIR__ . '/../src/Database/Connection.php';
-require_once __DIR__ . '/../src/Models/Auth.php';
-require_once __DIR__ . '/../src/Services/RelatorioService.php';
+require_once __DIR__ . '/../../src/Database/Connection.php';
+require_once __DIR__ . '/../../src/Models/Auth.php';
+require_once __DIR__ . '/../../src/Services/RelatorioService.php';
 
 $auth = new Auth();
 $auth->exigirEquipe();
+$usuario = $auth->usuario();
 
 $inicio = trim($_GET['inicio'] ?? '');
 $fim = trim($_GET['fim'] ?? '');
@@ -60,9 +61,9 @@ foreach ($emprestimos as $emprestimo) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatório de Empréstimos — Locadora LoucaWeb</title>
     <link rel="icon" href="../image/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="../public/css/normalize.css">
-    <link rel="stylesheet" href="../public/css/skeleton.css">
-    <link rel="stylesheet" href="../public/css/style.css">
+    <link rel="stylesheet" href="../../public/css/normalize.css">
+    <link rel="stylesheet" href="../../public/css/skeleton.css">
+    <link rel="stylesheet" href="../../public/css/style.css">
     <style>
         .resumo-relatorio { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         .resumo-relatorio div { padding: 1.5rem; background: #fff; border: 1px solid #e1e1e1; border-radius: 4px; }
@@ -82,9 +83,21 @@ foreach ($emprestimos as $emprestimo) {
     <header class="topo">
         <div class="container">
             <div class="marca"><h1>LoucaWeb</h1></div>
+                
+            <form class="form-cadastro" method="GET" action="clientesAtrasados.php">
+                    <button type="submit" class="botao botao-cadastro">Clientes atrasados</button>
+            </form>
+
+            <?php if (($usuario['perfil'] ?? '') === 'administrador'): ?>
+                <form class="form-cadastro" method="GET" action="filmesMaisAlugados.php">
+                    <button type="submit" class="botao botao-cadastro">Filmes mais alugados</button>
+                </form>
+            <?php endif; ?>
+                    
             <div class="acoes-topo">
-                <a class="button" href="emprestimos/emprestimos.php">Empréstimos</a>
-                <a class="button" href="painel.php">Voltar ao painel</a>
+                <a class="button" href="../emprestimos/emprestimos.php">Empréstimos</a>
+
+                <a class="button" href="../painel.php">Voltar ao painel</a>
             </div>
         </div>
     </header>
