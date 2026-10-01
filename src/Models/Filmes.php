@@ -148,4 +148,20 @@ class Filmes
 
         return $stmt->fetchAll();
     }
+    public function filtrarPorAtor(string $nome): array
+    {
+        $sql = "SELECT DISTINCT f.id, f.titulo, f.valor, f.poster_url
+                FROM filmes f
+                INNER JOIN atores_filme fa ON fa.id_filme = f.id
+                INNER JOIN atores a ON a.id = fa.id_ator
+                WHERE a.nome LIKE :termo
+                ORDER BY f.titulo";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':termo', '%' . $nome . '%', PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
 }
+

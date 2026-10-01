@@ -5,6 +5,9 @@
 // ===================================================
 require_once __DIR__ . '/../../src/Models/Auth.php';
 require_once __DIR__ . '/../../src/Models/Filmes.php';
+require_once __DIR__ . '/../../src/Models/Generos.php';
+require_once __DIR__ . '/../../src/Models/Dvd.php';
+
 
 $auth = new Auth();
 $auth->exigirLogin();
@@ -16,6 +19,9 @@ $documentRoot = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? ''), '
 $raizApp = '/' . trim(str_replace($documentRoot, '', $diretorioProjeto), '/');
 
 $filmeModel = new Filmes($conn);
+$generosModel = new Generos($conn);
+$dvdModel = new Dvd($conn);
+$listaGeneros = $generosModel->listarGeneros();
 
 // ===================================================
 // PARTE 2: PAGINAÇÃO (catálogo completo)
@@ -41,6 +47,18 @@ $parametroPesquisa = $pesquisa !== ''
     : '';
 $filtrarFilmes = $filmeModel->filtrarFilmes($pesquisa);
 
+//===================================================
+// parte 3.1: selecionar para pesquisar os filmes por atores
+//===================================================
+$pesquisa = trim($_GET['pesquisa'] ?? '');
+$tipoPesquisa = (($_GET['tipo'] ?? 'titulo') === 'ator') ? 'ator' : 'titulo';
+
+$filtrarFilmes = [];
+if ($pesquisa !== '') {
+    $filtrarFilmes = ($tipoPesquisa === 'ator')
+        ? $filmeModel->filtrarPorAtor($pesquisa)
+        : $filmeModel->filtrarFilmes($pesquisa);
+}
 // ===================================================
 // PARTE 4: FILTRO POR GÊNERO botões
 // ===================================================
@@ -83,17 +101,12 @@ if ($genero !== '') {
                     <button type="submit" class="button">Sair</button>
                 </form>
             <?php else: ?>
-                <form class="form-cadastro" method="GET" action="cadastrarFilme.php">
-                    <button type="submit" class="button button-primary">Adicionar Filmes</button>
-                </form>
-
-                <form class="form-cadastro" method="GET" action="../atores/atores.php">
-                    <button type="submit" class="button button-primary">Ver atores</button>
-                </form>
-
-                <form class="form-sair" method="GET" action="../painel.php">
-                    <button type="submit" class="button">Voltar</button>
-                </form>
+                <nav class="acoes-catalogo" aria-label="Navegação do catálogo">
+                    <a class="button button-primary" href="cadastrarFilme.php">Adicionar filme</a>
+                    <a class="button" href="estoque.php">Estoque</a>
+                    <a class="button" href="../atores/atores.php">Ver atores</a>
+                    <a class="button" href="../painel.php">Voltar ao painel</a>
+                </nav>
             <?php endif; ?>
         </div>
     </header>
@@ -106,14 +119,11 @@ if ($genero !== '') {
         <!-- =================================================== -->
         <div class="botoes-genero">
             <form method="GET" action="">
-                <button type="submit" name="genero" value="1" class="button button-primary">Ação</button>
-                <button type="submit" name="genero" value="2" class="button button-primary">Aventura</button>
-                <button type="submit" name="genero" value="3" class="button button-primary">Animação</button>
-                <button type="submit" name="genero" value="4" class="button button-primary">Comédia</button>
-                <button type="submit" name="genero" value="5" class="button button-primary">crime</button>
-                <button type="submit" name="genero" value="6" class="button button-primary">Documentário</button>
-                <button type="submit" name="genero" value="7" class="button button-primary">Drama</button>
-                <button type="submit" name="genero" value="8" class="button button-primary">Fantasia</button>
+                <?php foreach ($listaGeneros as $itemGenero): ?>
+                    <button type="submit" name="genero" value="<?= (int) $itemGenero['id'] ?>" class="button button-primary">
+                        <?= htmlspecialchars($itemGenero['genero'], ENT_QUOTES, 'UTF-8') ?>
+                    </button>
+                <?php endforeach; ?>
                 <button type="submit" name="genero" value="" class="button button-primary">Todos</button>
             </form>
         </div>
@@ -122,11 +132,19 @@ if ($genero !== '') {
         <!-- PARTE 7: BARRA DE PESQUISA -->
         <!-- =================================================== -->
         <div class="barra-pesquisa">
-            <form method="GET" action="">
-                <input class="u-full-width" type="text" name="pesquisa" placeholder="Pesquisar por título..." value="<?= htmlspecialchars($_GET['pesquisa'] ?? '') ?>">
-                <button type="submit" class="button button-primary">Pesquisar</button>
-            </form>
-        </div>
+    <form method="GET" action="">
+        <select name="tipo" id="tipo-pesquisa">
+            <option value="titulo" <?= $tipoPesquisa === 'titulo' ? 'selected' : '' ?>>Título</option>
+            <option value="ator" <?= $tipoPesquisa === 'ator' ? 'selected' : '' ?>>Ator</option>
+        </select>
+
+        <input class="u-full-width" type="text" name="pesquisa"
+            placeholder="<?= $tipoPesquisa === 'ator' ? 'Pesquisar por ator...' : 'Pesquisar por título...' ?>"
+            value="<?= htmlspecialchars($pesquisa) ?>">
+
+        <button type="submit" class="button button-primary">Pesquisar</button>
+    </form>
+</div>
 
         <!-- =================================================== -->
         <!-- PARTE 8: EXIBIÇÃO DE RESULTADOS                        -->
@@ -193,7 +211,11 @@ if ($genero !== '') {
             <!-- ---------- 8.2: RESULTADO DA PESQUISA POR TEXTO ---------- -->
             <div class="resultado-pesquisa">
                 <h2>Resultados da pesquisa:</h2>
-
+                <h2>
+                    <?= $tipoPesquisa === 'ator'
+                        ? 'Filmes com o ator "' . htmlspecialchars($pesquisa) . '":'
+                        : 'Resultados da pesquisa:' ?>
+                </h2>
                 <?php if (!empty($filtrarFilmes)): ?>
                     <div class="catalogo">
                         <?php foreach ($filtrarFilmes as $filme): ?>
@@ -214,7 +236,7 @@ if ($genero !== '') {
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
-                    <p>Nenhum filme encontrado.</p>
+                    <p><?= $tipoPesquisa === 'ator' ? 'Nenhum filme encontrado para esse ator.' : 'Nenhum filme encontrado.' ?></p>
                 <?php endif; ?>
             </div>
 

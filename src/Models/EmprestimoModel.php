@@ -28,14 +28,25 @@ class EmprestimoModel
         try {
             $this->db->beginTransaction();
 
-            // Verificar disponibilidade
+            // Verificar disponibilidade real (cópias livres, não estoque bruto)
             $valorTotal = 0;
             foreach ($dvdsIds as $idDvd) {
-                $stmt = $this->db->prepare('SELECT d.quantidade, f.valor FROM dvds d JOIN filmes f ON d.id_filme = f.id WHERE d.id = :id_dvd FOR UPDATE');
+                $stmt = $this->db->prepare(
+                    'SELECT d.id, d.quantidade, f.valor,
+                            d.quantidade - (SELECT COUNT(*)
+                                              FROM filmes_emprestimo fe2
+                                              LEFT JOIN filmes_devolucao fd ON fd.id_filme_emprestimo = fe2.id
+                                             WHERE fe2.id_dvd = d.id
+                                               AND fd.id IS NULL) AS disponivel
+                       FROM dvds d
+                       JOIN filmes f ON d.id_filme = f.id
+                      WHERE d.id = :id_dvd
+                        FOR UPDATE'
+                );
                 $stmt->execute([':id_dvd' => $idDvd]);
                 $dvd = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                if (!$dvd || $dvd['quantidade'] <= 0) {
+                if (!$dvd || (int) $dvd['disponivel'] <= 0) {
                     throw new Exception("O DVD ID {$idDvd} não está disponível ou não existe.");
                 }
 

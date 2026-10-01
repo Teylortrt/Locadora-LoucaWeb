@@ -14,7 +14,7 @@ $listarFilmesAtuados = $atorModel->listarFilmeAtuado($id);
 $ator = $atorModel->listarAtorPorID($id);
 
 foreach($ator as $nome):
- $ator = ($nome['nome']);
+$ator = ($nome['nome']);
 endforeach
 ?>
 <!DOCTYPE html>
@@ -28,7 +28,7 @@ endforeach
     <link rel="stylesheet" href="../../public/css/skeleton.css">
     <link rel="stylesheet" href="../../public/css/style.css">
 </head>
- <header class="topo">
+    <header class="topo">
         <div class="container">
             <div class="marca">
                 <span>Locadora</span>
