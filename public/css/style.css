@@ -95,7 +95,7 @@ body { background: #f7f7f7; }
     .topo .marca { margin-right: 0; }
     .card, .painel-card { padding: 2rem; }
     .barra-pesquisa form { align-items: stretch; flex-direction: column; }
-    .catalogo, .resultado-pesquisa { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
+    .catalogo { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
 }
 
 
@@ -105,7 +105,7 @@ body { background: #f7f7f7; }
     .paginacao a.ativo { background-color: #007BFF; color: white; border-color: #007BFF; }
 
     /* CSS extra para alinhar os resultados da pesquisa */
-    .resultado-pesquisa { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; }
+    .resultado-pesquisa { display: block; margin-top: 20px; }
     .resultado-item { width: 150px; text-align: center; }
     .resultado-item img { max-width: 100%; border-radius: 5px; }
     .resultado-item p { font-size: 14px; margin: 5px 0; font-weight: bold; }
