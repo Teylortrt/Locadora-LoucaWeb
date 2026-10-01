@@ -6,6 +6,7 @@
 require_once __DIR__ . '/../../src/Models/Auth.php';
 require_once __DIR__ . '/../../src/Models/Filmes.php';
 require_once __DIR__ . '/../../src/Models/Generos.php';
+require_once __DIR__ . '/../../src/Models/Dvd.php';
 
 
 $auth = new Auth();
@@ -18,6 +19,7 @@ $raizApp = '/' . trim(str_replace($documentRoot, '', $diretorioProjeto), '/');
 
 $filmeModel = new Filmes($conn);
 $generosModel = new Generos($conn);
+$dvdModel = new Dvd($conn);
 $listaGeneros = $generosModel->listarGeneros();
 
 // ===================================================
@@ -95,6 +97,7 @@ if ($genero !== '') {
 
             <nav class="acoes-catalogo" aria-label="Navegação do catálogo">
                 <a class="button button-primary" href="cadastrarFilme.php">Adicionar filme</a>
+                <a class="button" href="estoque.php">Estoque</a>
                 <a class="button" href="../atores/atores.php">Ver atores</a>
                 <a class="button" href="../painel.php">Voltar ao painel</a>
             </nav>
@@ -162,6 +165,12 @@ if ($genero !== '') {
                         <div class="detalhes-filme">
                             <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
                             <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
+                            <?php $disp = $dvdModel->verificarDisponibilidade((int) $filme['id']); ?>
+                            <?php if ($disp > 0): ?>
+                                <span class="badge disponivel"><?= $disp ?> cópia(s)</span>
+                            <?php else: ?>
+                                <span class="badge indisponivel">Indisponível</span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -220,6 +229,12 @@ if ($genero !== '') {
                                 <div class="detalhes-filme">
                                     <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
                                     <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
+                                    <?php $disp = $dvdModel->verificarDisponibilidade((int) $filme['id']); ?>
+                                    <?php if ($disp > 0): ?>
+                                        <span class="badge disponivel"><?= $disp ?> cópia(s)</span>
+                                    <?php else: ?>
+                                        <span class="badge indisponivel">Indisponível</span>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </a>
@@ -249,6 +264,12 @@ if ($genero !== '') {
                         <div class="detalhes-filme">
                             <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
                             <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
+                            <?php $disp = $dvdModel->verificarDisponibilidade((int) $filme['id']); ?>
+                            <?php if ($disp > 0): ?>
+                                <span class="badge disponivel"><?= $disp ?> cópia(s)</span>
+                            <?php else: ?>
+                                <span class="badge indisponivel">Indisponível</span>
+                            <?php endif; ?>
                         </div>
                     </div>
                     </a>
