@@ -45,6 +45,10 @@ $erro = isset($_GET['erro']);
             <?php if ($erro): ?>
                 <p class="mensagem erro">E-mail ou senha inválidos.</p>
             <?php endif; ?>
+
+            <p style="text-align: center; margin-top: 1.5rem;">
+                <a href="catalogo.php" style="color: #555; text-decoration: none;">← Voltar ao catálogo</a>
+            </p>
         </form>
         </div>
     </main>

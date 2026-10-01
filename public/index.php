@@ -26,6 +26,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET' && $caminho === '/') {
     header('Location: ' . $raizApp . '/templates/login.php');
+    header('Location: ' . $raizApp . '/templates/catalogo.php');
     exit;
 }
 
