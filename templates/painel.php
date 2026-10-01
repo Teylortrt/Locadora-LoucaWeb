@@ -72,8 +72,8 @@ $rotuloCopias = static fn (int $copias): string => $copias > 0
         <div class="marca">
             <h1>LoucaWeb</h1>
         </div>
-        <form class="form-cadastro" method="GET" action="cadastro.php">
-            <button type="submit" class="botao botao-cadastro">Cadastro</button>
+        <form class="form-cliente" method="GET" action="/Locadora-LoucaWeb/templates/clientes/clientes.php">
+            <button type="submit" class="button botao-cliente">Cliente</button>
         </form>
 
         <form class="form-catalogo" method="GET" action="filmes/filmes.php">
@@ -88,7 +88,7 @@ $rotuloCopias = static fn (int $copias): string => $copias > 0
             <form class="form-sair" method="POST" action="../public/logout-web">
                 <button type="submit" class="button botao-sair">Sair</button>
             </form>
-        </div>
+        </nav>
       </div>
     </header>
 

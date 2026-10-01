@@ -10,7 +10,11 @@ body { background: #f7f7f7; }
 .topo .container { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
 .topo .marca { margin: 0; margin-right: auto; }
 .topo .marca h1 { font-size: 2rem; }
-.form-cadastro, .form-catalogo, .form-sair, .form-excluir { margin-bottom: 0; }
+.botoes-painel { display: flex; align-items: center; gap: .8rem; margin-left: auto; }
+.botoes-painel .button, .botoes-painel form { margin-bottom: 0; }
+.acoes-catalogo { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: .8rem; margin-left: auto; }
+.acoes-catalogo .button { margin-bottom: 0; }
+.form-cadastro, .form-cliente, .form-catalogo, .form-sair, .form-excluir { margin-bottom: 0; }
 .form-cadastro, .form-sair { display: flex; align-items: center; }
 .conteudo { padding-top: 4rem; padding-bottom: 4rem; }
 .cadastrar-filme .card { max-width: 100%; }
@@ -44,6 +48,30 @@ body { background: #f7f7f7; }
 .linha-filme { display: flex; align-items: flex-end; }
 .botao-adicionar { margin-bottom: 1.5rem; width: 100%; }
 .navegacao { margin-top: 2rem; }
+.navegacao .button { margin: 0 .8rem .5rem 0; }
+.formulario-cliente { box-shadow: 0 4px 18px rgba(0,0,0,.05); }
+.formulario-cliente form { margin-bottom: 0; }
+.formulario-cliente input { background: #fff; }
+.tabela-clientes { overflow-x: auto; padding: 1.5rem; }
+.tabela-clientes table { min-width: 520px; margin-bottom: 0; border-collapse: collapse; }
+.tabela-clientes th { color: #444; background: #f7f7f7; text-align: left; }
+.tabela-clientes td, .tabela-clientes th { padding: 1.2rem 1rem; vertical-align: middle; border-bottom: 1px solid #e8e8e8; }
+.tabela-clientes tbody tr:last-child td { border-bottom: 0; }
+.tabela-clientes tbody tr:hover { background: #fafafa; }
+.tabela-clientes .acao-coluna { width: 1%; }
+.tabela-clientes .form-excluir, .tabela-clientes .botao-excluir { margin-bottom: 0; }
+.clientes-vazio { margin: 0; padding: 1rem; color: #777; text-align: center; }
+.menu-clientes { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.2rem; margin-top: 2.5rem; }
+.item-menu-cliente { display: flex; min-height: 10rem; flex-direction: column; justify-content: center; gap: .6rem; padding: 1.8rem; color: #222; background: #fff; border: 1px solid #e1e1e1; border-radius: 6px; text-decoration: none; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+.item-menu-cliente:hover, .item-menu-cliente:focus { color: #222; border-color: #33c3f0; box-shadow: 0 4px 14px rgba(0,0,0,.08); transform: translateY(-2px); }
+.item-menu-cliente strong { font-size: 1.7rem; }
+.item-menu-cliente span { color: #777; font-size: 1.3rem; }
+.botao-editar { margin: 0 .6rem .5rem 0; }
+.form-excluir { display: inline-block; vertical-align: top; }
+.tabela-responsiva { overflow-x: auto; }
+.status-emprestimo { display: inline-block; padding: .3rem .8rem; border-radius: 1.2rem; font-size: 1.2rem; font-weight: 600; white-space: nowrap; }
+.status-emprestimo.devolvido { color: #1e7e34; background: #dff0d8; }
+.status-emprestimo.aberto { color: #8a6d3b; background: #fcf8e3; }
 
 /* Catálogo */
 .catalogo-pagina { max-width: 1200px; }

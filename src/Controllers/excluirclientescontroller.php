@@ -9,6 +9,6 @@ $stmt = $conn->prepare($sql);
 $stmt->bindParam(':id', $id);
 $stmt->execute();
 //redireciona para a página de listagem de clientes após a exclusão
-header("Location: ../../templates/tabelaclientes.php");
+header("Location: ../../templates/clientes/tabelaclientes.php");
 exit;
 ?>
