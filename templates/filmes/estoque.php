@@ -3,11 +3,13 @@ require_once __DIR__ . '/../../config/env.php';
 require_once __DIR__ . '/../../config/conexao.php';
 require_once __DIR__ . '/../../src/Models/Auth.php';
 require_once __DIR__ . '/../../src/Models/Dvd.php';
+require_once __DIR__ . '/../../src/Controllers/FilmeController.php';
 
 $auth = new Auth();
 $auth->exigirLogin();
 
 $dvdModel = new Dvd($conn);
+$filmeController = new FilmesController($conn);
 
 // --- Ação POST: atualizar quantidade ---
 $mensagem     = '';
@@ -20,6 +22,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_quantidade']))
     try {
         $dvdModel->atualizarQuantidade($idDvd, $novaQuantidade);
         $mensagem     = "Estoque do DVD #{$idDvd} atualizado para {$novaQuantidade} cópia(s).";
+        $mensagemTipo = 'sucesso';
+    } catch (\Throwable $e) {
+        $mensagem     = $e->getMessage();
+        $mensagemTipo = 'erro';
+    }
+}
+
+// --- Ação POST: excluir filme e DVD ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['excluir_filme'])) {
+    $idFilme = (int) ($_POST['id_filme'] ?? 0);
+
+    try {
+        $filmeController->excluirFilme($idFilme);
+        $mensagem     = "Filme excluído com sucesso.";
         $mensagemTipo = 'sucesso';
     } catch (\Throwable $e) {
         $mensagem     = $e->getMessage();
@@ -96,7 +112,8 @@ $estoque     = $dvdModel->listarEstoque($porPagina, $offset, $busca);
                         <th style="text-align: center;">Estoque</th>
                         <th style="text-align: center;">Emprestadas</th>
                         <th style="text-align: center;">Disponível</th>
-                        <th class="acao-coluna">Ação</th>
+                        <th class="acao-coluna">Editar</th>
+                        <th class="acao-coluna">Excluir</th>                       
                     </tr>
                 </thead>
                 <tbody>
@@ -131,6 +148,14 @@ $estoque     = $dvdModel->listarEstoque($porPagina, $offset, $busca);
                             </td>
                             <td class="acao-coluna">
                                     <button type="submit" name="salvar_quantidade" value="1" class="button" style="margin: 0;">Salvar</button>
+                                </form>
+                            </td>
+                            <td class="acao-coluna">
+                                <form method="POST" action="estoque.php<?= $busca ? '?busca=' . urlencode($busca) . '&pagina=' . $paginaAtual : '?pagina=' . $paginaAtual ?>"
+                                      style="margin: 0;"
+                                      onsubmit="return confirm('Excluir o filme &quot;<?= htmlspecialchars($dvd['titulo'], ENT_QUOTES) ?>&quot; e todos os seus dados? Esta ação não pode ser desfeita.');">
+                                    <input type="hidden" name="id_filme" value="<?= (int) $dvd['id_filme'] ?>">
+                                    <button type="submit" name="excluir_filme" value="1" class="botao-excluir" style="margin: 0;">Excluir</button>
                                 </form>
                             </td>
                         </tr>
