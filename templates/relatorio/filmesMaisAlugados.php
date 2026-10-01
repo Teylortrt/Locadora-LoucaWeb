@@ -42,6 +42,7 @@ $totalAlugueis = array_sum(array_map(
             <div class="marca"><h1>LoucaWeb</h1></div>
             <div class="acoes-topo">
                 <a class="button" href="../filmes/filmes.php">Catálogo</a>
+                <a class="button" href="relatorioEmprestimos.php">Relatórios</a>
                 <a class="button" href="../painel.php">Voltar ao painel</a>
             </div>
         </div>
