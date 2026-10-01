@@ -31,7 +31,6 @@ $usuario = $auth->usuario();
             <nav class="menu-clientes" aria-label="Opções de clientes">
                 <a class="item-menu-cliente" href="cadastro.php"><strong>Cadastrar cliente</strong><span>Adicionar um novo cliente</span></a>
                 <a class="item-menu-cliente" href="tabelaclientes.php"><strong>Tabela de clientes</strong><span>Consultar e editar clientes cadastrados</span></a>
-                <a class="item-menu-cliente" href="historico.php"><strong>Histórico de empréstimos</strong><span>Consultar empréstimos e devoluções</span></a>
             </nav>
         </section>
     </main>
