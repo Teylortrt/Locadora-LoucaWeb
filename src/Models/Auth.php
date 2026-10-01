@@ -47,9 +47,58 @@ class Auth
         }
 
         unset($usuario['senha']);
+        session_regenerate_id(true);
         $_SESSION['usuario'] = $usuario;
 
         return true;
+    }
+
+    public function cadastrarCliente(array $dados): void
+    {
+        $this->db->beginTransaction();
+
+        try {
+            $stmt = $this->db->prepare(
+                'INSERT INTO clientes (nome, sobrenome, telefone, endereco)
+                 VALUES (:nome, :sobrenome, :telefone, :endereco)'
+            );
+            $stmt->execute([
+                'nome' => $dados['nome'],
+                'sobrenome' => $dados['sobrenome'],
+                'telefone' => $dados['telefone'],
+                'endereco' => $dados['endereco'],
+            ]);
+            $idCliente = (int) $this->db->lastInsertId();
+
+            $stmt = $this->db->prepare(
+                "INSERT INTO usuarios (nome, email, senha, perfil, id_cliente)
+                 VALUES (:nome, :email, :senha, 'cliente', :id_cliente)"
+            );
+            $stmt->execute([
+                'nome' => $dados['nome'] . ' ' . $dados['sobrenome'],
+                'email' => $dados['email'],
+                'senha' => password_hash($dados['senha'], PASSWORD_DEFAULT),
+                'id_cliente' => $idCliente,
+            ]);
+            $idUsuario = (int) $this->db->lastInsertId();
+
+            $this->db->commit();
+            session_regenerate_id(true);
+            $_SESSION['usuario'] = [
+                'id' => $idUsuario,
+                'id_cliente' => $idCliente,
+                'nome' => $dados['nome'] . ' ' . $dados['sobrenome'],
+                'email' => $dados['email'],
+                'perfil' => 'cliente',
+                'ativo' => 1,
+            ];
+        } catch (\Throwable $erro) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $erro;
+        }
     }
 
     public function sair(): void
@@ -84,5 +133,20 @@ class Auth
             header('Location: ' . $raizApp . '/templates/login.php');
             exit;
         }
+    }
+
+    public function exigirPerfis(array $perfis): void
+    {
+        $this->exigirLogin();
+
+        if (!in_array($this->usuario()['perfil'] ?? '', $perfis, true)) {
+            http_response_code(403);
+            exit('Acesso não autorizado.');
+        }
+    }
+
+    public function exigirEquipe(): void
+    {
+        $this->exigirPerfis(['funcionario', 'administrador']);
     }
 }

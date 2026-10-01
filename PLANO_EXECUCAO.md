@@ -109,7 +109,9 @@ public function verificarDisponibilidade(int $idFilme): int
 public function buscarDisponivelPorFilme(int $idFilme): array|null
 // ['id','id_filme','quantidade'] ou null
 
-// Empréstimo — tabela: emprestimos (id, data, id_cliente). Sem data_prevista/status.
+// Empréstimo — tabela: emprestimos (id, data, data_prevista, id_cliente).
+// data_prevista registra o prazo de entrega; atraso é calculado comparando
+// esse prazo com a data atual e verificando itens ainda não devolvidos.
 public function buscarPorId(int $id): array|null
 public function listarPorCliente(int $idCliente): array
 public function estaAtrasado(int $idEmprestimo): bool

@@ -9,13 +9,19 @@ class RelatorioService
 {
     private PDO $db;
 
+<<<<<<< HEAD
     // Usa a conexão informada ou obtém a instância compartilhada do banco.
+=======
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function __construct(?PDO $conexao = null)
     {
         $this->db = $conexao ?? Connection::getInstance();
     }
 
+<<<<<<< HEAD
     // Conta quantos clientes existem na tabela de cadastro.
+=======
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function totalClientesCadastrados(): int
     {
         $stmt = $this->db->query("SELECT COUNT(*) FROM clientes");
@@ -23,7 +29,11 @@ class RelatorioService
         return (int) $stmt->fetchColumn();
     }
 
+<<<<<<< HEAD
     // Lista clientes que possuem empréstimo sem registro de devolução.
+=======
+    // Clientes com empréstimos ainda sem devolução registrada
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function clientesComEmprestimosAtivos(): array
     {
         $sql = "SELECT DISTINCT c.*
@@ -37,7 +47,10 @@ class RelatorioService
         return $stmt->fetchAll();
     }
 
+<<<<<<< HEAD
     // Agrupa por cliente os empréstimos vencidos que ainda têm filmes pendentes.
+=======
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function clientesComEmprestimosAtrasados(): array
     {
         $temDataPrevista = $this->db->query("SHOW COLUMNS FROM emprestimos LIKE 'data_prevista'")->fetch() !== false;
@@ -63,7 +76,11 @@ class RelatorioService
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
+<<<<<<< HEAD
     // Retorna os clientes com mais empréstimos, limitados à quantidade pedida.
+=======
+    // Clientes ordenados pela quantidade de empréstimos realizados
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function clientesMaisAtivos(int $limite = 10): array
     {
         $sql = "SELECT c.*, COUNT(e.id) AS total_emprestimos
@@ -80,7 +97,10 @@ class RelatorioService
         return $stmt->fetchAll();
     }
 
+<<<<<<< HEAD
     // Lista os filmes mais alugados, do maior para o menor número de locações.
+=======
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function filmesMaisAlugados(int $limite = 10): array
     {
         $sql = "SELECT f.id, f.titulo, COUNT(fe.id) AS total_alugueis
@@ -98,7 +118,11 @@ class RelatorioService
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+<<<<<<< HEAD
     // Conta os empréstimos cujas datas estão entre o início e o fim informados.
+=======
+    // Total de empréstimos realizados dentro de um intervalo de datas
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function totalEmprestimosPorPeriodo(string $dataInicio, string $dataFim): int
     {
         $sql = "SELECT COUNT(*) FROM emprestimos WHERE data BETWEEN :inicio AND :fim";
@@ -111,10 +135,13 @@ class RelatorioService
         return (int) $stmt->fetchColumn();
     }
 
+<<<<<<< HEAD
     /**
      * Lista empréstimos com dados de cliente, filmes, prazo e itens pendentes.
      * Aplica filtros opcionais de período e situação (aberto, devolvido ou atrasado).
      */
+=======
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function emprestimos(?string $dataInicio = null, ?string $dataFim = null, string $situacao = 'todos'): array
     {
         $filtros = [];
@@ -178,7 +205,10 @@ class RelatorioService
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+<<<<<<< HEAD
     // Soma o valor cadastrado dos filmes associados a todos os empréstimos.
+=======
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function totalFaturamento(): float
     {
         $sql = "SELECT COALESCE(SUM(f.valor), 0)

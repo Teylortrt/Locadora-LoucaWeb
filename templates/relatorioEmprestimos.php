@@ -13,7 +13,10 @@ $situacoesValidas = ['todos', 'aberto', 'devolvido', 'atrasado'];
 $erro = '';
 $emprestimos = [];
 
+<<<<<<< HEAD
 // Confere o formato ISO da data e se o dia existe no calendário.
+=======
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
 $dataValida = static function (string $data): bool {
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
         return false;

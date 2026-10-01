@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../src/Models/AtorModel.php';
 
 //Instancia a autenticação usando a conexão carregada pelo modelo
 $auth = new Auth();
-$auth->exigirLogin();
+$auth->exigirEquipe();
 
 $atorModel = new Ator($conn);
 

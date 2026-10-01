@@ -4,17 +4,24 @@ class EmprestimoModel
 {
     private PDO $db;
 
+<<<<<<< HEAD
     // Guarda a conexão usada para criar e consultar empréstimos.
+=======
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function __construct(PDO $conexao)
     {
         $this->db = $conexao;
     }
 
     /**
+<<<<<<< HEAD
     * Confere se cada DVD existe e tem quantidade cadastrada acima de zero,
     * cria o empréstimo e associa seus DVDs numa transação.
     * A checagem não desconta outros empréstimos ainda não devolvidos.
      * Retorna o identificador do empréstimo e a soma dos valores dos filmes.
+=======
+     * US22 - Realizar empréstimo
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
      */
     public function criarEmprestimo(int $idCliente, array $dvdsIds, int $prazoDias = 1)
     {
@@ -60,7 +67,11 @@ class EmprestimoModel
     }
 
     /**
+<<<<<<< HEAD
      * Lista empréstimos que ainda possuem pelo menos um item não devolvido.
+=======
+     * US23 - Consultar empréstimos
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
      */
     public function visualizarEmprestimos()
     {
@@ -86,7 +97,11 @@ class EmprestimoModel
     }
 
     /**
+<<<<<<< HEAD
      * Lista somente os itens ainda pendentes dos empréstimos do cliente informado.
+=======
+     * US24 - Consultar empréstimos de um cliente
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
      */
     public function consultarEmprestimosCliente(int $idCliente)
     {
@@ -110,8 +125,13 @@ class EmprestimoModel
     }
 
     /**
+<<<<<<< HEAD
      * Lista itens pendentes cujo prazo venceu e calcula os dias de atraso.
      * Usa a data prevista do empréstimo ou, se ausente, sete dias após a locação.
+=======
+     * US25 - Identificar empréstimos atrasados
+     * Assumindo um prazo de 7 dias para devolução
+>>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
      */
     public function calcularAtraso()
     {
