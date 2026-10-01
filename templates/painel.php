@@ -80,6 +80,10 @@ $rotuloCopias = static fn (int $copias): string => $copias > 0
             <button type="submit" class="botao botao-catalogo">Catálogo</button>
         </form>
 
+        <form class="form-cadastro" method="GET" action="filmes/estoque.php">
+            <button type="submit" class="button">Estoque</button>
+        </form>
+
         <form class="form-cadastro" method="GET" action="emprestimos/emprestimos.php">
             <button type="submit" class="botao botao-cadastro">Emprestimos</button>
         </form>
