@@ -71,4 +71,108 @@ class Dvd
 
         return $dvd ?: null;
     }
+
+    // Busca o registro de DVD pelo id_filme (para saber o id do dvd e a quantidade atual).
+    public function buscarPorFilme(int $idFilme): ?array
+    {
+        $sql = "SELECT d.id, d.id_filme, d.quantidade, " . self::COPIAS_DISPONIVEIS . " AS disponivel
+                  FROM dvds d
+                 WHERE d.id_filme = :idFilme";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':idFilme', $idFilme, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $dvd = $stmt->fetch();
+
+        return $dvd ?: null;
+    }
+
+    // Atualiza a quantidade (estoque físico) de um DVD.
+    // Lança exceção se a nova quantidade for menor que as cópias emprestadas.
+    public function atualizarQuantidade(int $idDvd, int $novaQuantidade): void
+    {
+        if ($novaQuantidade < 0) {
+            throw new \InvalidArgumentException('A quantidade não pode ser negativa.');
+        }
+
+        // Busca quantas cópias estão emprestadas (sem devolução)
+        $dvd = $this->buscarComDisponibilidade($idDvd);
+
+        if (!$dvd) {
+            throw new \RuntimeException('DVD não encontrado.');
+        }
+
+        $emprestadas = (int) $dvd['quantidade'] - (int) $dvd['disponivel'];
+
+        if ($novaQuantidade < $emprestadas) {
+            throw new \RuntimeException(
+                "Não é possível reduzir para {$novaQuantidade}. "
+                . "Existem {$emprestadas} cópia(s) emprestada(s) no momento."
+            );
+        }
+
+        $stmt = $this->db->prepare("UPDATE dvds SET quantidade = :qtd WHERE id = :id");
+        $stmt->execute(['qtd' => $novaQuantidade, 'id' => $idDvd]);
+    }
+
+    // Lista todos os DVDs com dados completos para a tela de gestão de estoque.
+    // Suporta paginação e busca por título.
+    public function listarEstoque(int $limit, int $offset, string $busca = ''): array
+    {
+        $where = '';
+        $params = [];
+
+        if ($busca !== '') {
+            $where = " AND f.titulo LIKE :busca";
+            $params['busca'] = '%' . $busca . '%';
+        }
+
+        $sql = "SELECT d.id AS id_dvd, d.id_filme, f.titulo, g.genero,
+                       d.quantidade, " . self::COPIAS_DISPONIVEIS . " AS disponivel
+                  FROM dvds d
+                  JOIN filmes f ON f.id = d.id_filme
+                  JOIN generos g ON g.id = f.id_genero
+                 WHERE 1=1{$where}
+                 ORDER BY f.titulo
+                 LIMIT :lim OFFSET :off";
+
+        $stmt = $this->db->prepare($sql);
+
+        foreach ($params as $k => $v) {
+            $stmt->bindValue(':' . $k, $v, PDO::PARAM_STR);
+        }
+
+        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    // Conta o total de DVDs (para paginação).
+    public function contarEstoque(string $busca = ''): int
+    {
+        $where = '';
+        $params = [];
+
+        if ($busca !== '') {
+            $where = " AND f.titulo LIKE :busca";
+            $params['busca'] = '%' . $busca . '%';
+        }
+
+        $sql = "SELECT COUNT(*) FROM dvds d
+                  JOIN filmes f ON f.id = d.id_filme
+                 WHERE 1=1{$where}";
+
+        $stmt = $this->db->prepare($sql);
+
+        foreach ($params as $k => $v) {
+            $stmt->bindValue(':' . $k, $v, PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
 }
