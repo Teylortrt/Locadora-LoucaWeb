@@ -1,6 +1,18 @@
 <?php
 class Filmes
 {
+        private const FILME_DISPONIVEL = "EXISTS (
+                SELECT 1
+                    FROM dvds d
+                 WHERE d.id_filme = f.id
+                     AND d.quantidade > (
+                             SELECT COUNT(*)
+                                 FROM filmes_emprestimo fe
+                                 LEFT JOIN filmes_devolucao fd ON fd.id_filme_emprestimo = fe.id
+                                WHERE fe.id_dvd = d.id AND fd.id IS NULL
+                     )
+        )";
+
     private PDO $db;
 
     // Recebe a conexão pronta pelo construtor
@@ -12,7 +24,7 @@ class Filmes
     // Retorna os dados para quem chamou o método
     public function listarTodos(): array
     {
-        $sql = "SELECT * FROM filmes ORDER BY id";
+        $sql = "SELECT f.* FROM filmes f WHERE " . self::FILME_DISPONIVEL . " ORDER BY f.id";
         $stmt = $this->db->query($sql);
 
         return $stmt->fetchAll(); // PDO::FETCH_ASSOC já foi definido no arquivo de conexão
@@ -20,7 +32,11 @@ class Filmes
 
     public function listarPorPagina(int $limit, int $offset): array
     {
-        $sql = "SELECT id, titulo, valor, poster_url FROM filmes LIMIT :limit OFFSET :offset";
+        $sql = "SELECT f.id, f.titulo, f.valor, f.poster_url
+                  FROM filmes f
+                 WHERE " . self::FILME_DISPONIVEL . "
+                 ORDER BY f.id
+                 LIMIT :limit OFFSET :offset";
         // BindValue com PARAM_INT é obrigatório para LIMIT/OFFSET no MySQL
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -32,7 +48,7 @@ class Filmes
 
     public function contarTotal(): int
     {
-        $sql = "SELECT COUNT(id) FROM filmes";
+        $sql = "SELECT COUNT(f.id) FROM filmes f WHERE " . self::FILME_DISPONIVEL;
         $stmt = $this->db->query($sql);
 
         // fetchColumn() pega direto o valor da primeira coluna (o resultado do COUNT)
@@ -59,7 +75,12 @@ class Filmes
         if (empty(trim($termo))) {
             return []; // Retorna uma lista vazia sem consultar o banco
         }
-        $sql = "SELECT id, titulo, valor, poster_url FROM filmes WHERE titulo LIKE :termo ORDER BY titulo LIMIT 10";
+                $sql = "SELECT f.id, f.titulo, f.valor, f.poster_url
+                                    FROM filmes f
+                                 WHERE " . self::FILME_DISPONIVEL . "
+                                     AND f.titulo LIKE :termo
+                                 ORDER BY f.titulo
+                                 LIMIT 10";
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':termo', '%' . $termo . '%', PDO::PARAM_STR);
         $stmt->execute();
@@ -70,7 +91,10 @@ class Filmes
     // Conta quantos filmes existem para um determinado gênero (usado na paginação)
     public function contarPorGenero(int $genero): int
     {
-        $sql = "SELECT COUNT(id) FROM filmes WHERE id_genero = :genero";
+                $sql = "SELECT COUNT(f.id)
+                                    FROM filmes f
+                                 WHERE f.id_genero = :genero
+                                     AND " . self::FILME_DISPONIVEL;
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':genero', $genero, PDO::PARAM_INT);
         $stmt->execute();
@@ -81,10 +105,12 @@ class Filmes
     // Busca os filmes de um gênero específico, já com paginação (igual listarPorPagina)
     public function filtrarPorGenero(int $genero, int $limit, int $offset): array
     {
-        $sql = "SELECT id, titulo, valor, poster_url FROM filmes
-                WHERE id_genero = :genero
-                ORDER BY titulo, id
-                LIMIT :limit OFFSET :offset";
+                $sql = "SELECT f.id, f.titulo, f.valor, f.poster_url
+                                    FROM filmes f
+                                 WHERE f.id_genero = :genero
+                                     AND " . self::FILME_DISPONIVEL . "
+                                 ORDER BY f.titulo, f.id
+                                 LIMIT :limit OFFSET :offset";
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':genero', $genero, PDO::PARAM_INT);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -100,6 +126,7 @@ class Filmes
                 FROM filmes f
                 INNER JOIN generos g ON g.id = f.id_genero
                 WHERE f.id = :id";
+        $sql .= ' AND ' . self::FILME_DISPONIVEL;
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();

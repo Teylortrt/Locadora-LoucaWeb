@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../src/Models/Dvd.php';
 
 $auth = new Auth();
 $auth->exigirLogin();
+$usuario = $auth->usuario();
 
 // Calcula a raiz da aplicação para o JavaScript montar a URL da API (GET /filmes/{id}).
 $diretorioProjeto = str_replace('\\', '/', dirname(__DIR__, 2));
@@ -95,17 +96,23 @@ if ($genero !== '') {
                 <h1>LoucaWeb</h1>
             </div>
 
-            <nav class="acoes-catalogo" aria-label="Navegação do catálogo">
-                <a class="button button-primary" href="cadastrarFilme.php">Adicionar filme</a>
-                <a class="button" href="estoque.php">Estoque</a>
-                <a class="button" href="../atores/atores.php">Ver atores</a>
-                <a class="button" href="../painel.php">Voltar ao painel</a>
-            </nav>
+            <?php if (($usuario['perfil'] ?? '') === 'cliente'): ?>
+                <form class="form-sair" method="POST" action="../../public/logout-web">
+                    <button type="submit" class="button">Sair</button>
+                </form>
+            <?php else: ?>
+                <nav class="acoes-catalogo" aria-label="Navegação do catálogo">
+                    <a class="button button-primary" href="cadastrarFilme.php">Adicionar filme</a>
+                    <a class="button" href="estoque.php">Estoque</a>
+                    <a class="button" href="../atores/atores.php">Ver atores</a>
+                    <a class="button" href="../painel.php">Voltar ao painel</a>
+                </nav>
+            <?php endif; ?>
         </div>
     </header>
 
     <main class="container conteudo catalogo-pagina">
-        <h1>Catálogo</h1>
+        <h1><?= ($usuario['perfil'] ?? '') === 'cliente' ? 'Filmes disponíveis' : 'Catálogo' ?></h1>
 
         <!-- =================================================== -->
         <!-- PARTE 6: BOTÕES DE GÊNERO -->

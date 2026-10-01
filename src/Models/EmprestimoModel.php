@@ -4,13 +4,17 @@ class EmprestimoModel
 {
     private PDO $db;
 
+    // Guarda a conexão usada para criar e consultar empréstimos.
     public function __construct(PDO $conexao)
     {
         $this->db = $conexao;
     }
 
     /**
-     * US22 - Realizar empréstimo
+    * Confere se cada DVD existe e tem quantidade cadastrada acima de zero,
+    * cria o empréstimo e associa seus DVDs numa transação.
+    * A checagem não desconta outros empréstimos ainda não devolvidos.
+     * Retorna o identificador do empréstimo e a soma dos valores dos filmes.
      */
     public function criarEmprestimo(int $idCliente, array $dvdsIds, int $prazoDias = 1)
     {
@@ -67,7 +71,7 @@ class EmprestimoModel
     }
 
     /**
-     * US23 - Consultar empréstimos
+     * Lista empréstimos que ainda possuem pelo menos um item não devolvido.
      */
     public function visualizarEmprestimos()
     {
@@ -93,7 +97,7 @@ class EmprestimoModel
     }
 
     /**
-     * US24 - Consultar empréstimos de um cliente
+     * Lista somente os itens ainda pendentes dos empréstimos do cliente informado.
      */
     public function consultarEmprestimosCliente(int $idCliente)
     {
@@ -117,8 +121,8 @@ class EmprestimoModel
     }
 
     /**
-     * US25 - Identificar empréstimos atrasados
-     * Assumindo um prazo de 7 dias para devolução
+     * Lista itens pendentes cujo prazo venceu e calcula os dias de atraso.
+     * Usa a data prevista do empréstimo ou, se ausente, sete dias após a locação.
      */
     public function calcularAtraso()
     {

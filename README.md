@@ -7,6 +7,7 @@ Sistema web de gerenciamento de uma locadora de filmes, desenvolvido em PHP puro
 O sistema combina:
 
 - autenticação de usuários via sessão;
+- criação de acesso de cliente com catálogo em modo de leitura;
 - painel administrativo para navegação do sistema;
 - catálogo de filmes em interface web;
 - backend PHP com Models, Controllers e serviços;
@@ -26,9 +27,10 @@ O projeto foi pensado para funcionar em ambiente local com XAMPP/LAMP e utiliza 
 ## Funcionalidades
 
 - Login e logout de usuários
-- Proteção de páginas por autenticação
+- Cadastro próprio e login de clientes
+- Proteção de páginas por perfil de acesso
 - Cadastro e gerenciamento de clientes
-- Catálogo, detalhes de filmes, elenco e disponibilidade de cópias
+- Catálogo de filmes disponíveis para clientes, com detalhes e disponibilidade de cópias
 - Registro de empréstimos, itens e devoluções
 - Consulta e filtro de empréstimos atrasados usando a data prevista de entrega
 - Endpoints PHP para operações do sistema e consultas em JSON
@@ -95,6 +97,11 @@ mysql -u root -p < database/locadora.sql
 ```
 
 O script cria o schema `locadora`, suas tabelas, relações e usuários iniciais.
+Ele também inclui 100 clientes fictícios para facilitar testes e demonstrações.
+
+O arquivo representa o schema atual completo, incluindo prazo previsto de devolução e acesso de clientes. Use-o para criar uma instalação nova. Não o reimporte sobre um banco existente: `CREATE TABLE IF NOT EXISTS` não atualiza tabelas já criadas e os dados iniciais podem ser duplicados. Bancos antigos precisam de atualização de schema planejada e backup antes de usar a versão atual.
+
+O arquivo `database/seed_clientes.sql` foi incorporado ao `database/locadora.sql`; use o arquivo principal em instalações novas.
 
 ### 4. Configure a chave TMDB
 
@@ -118,12 +125,13 @@ A página inicial redireciona para a tela de login. Para usar as subrotas listad
 
 ## Acesso ao sistema
 
-O acesso às páginas administrativas é protegido por sessão. Após o login, o usuário pode acessar:
+Clientes podem criar uma conta pela tela de login e, após o cadastro, são direcionados ao catálogo de filmes disponíveis. O cliente tem acesso somente de leitura; empréstimos e operações administrativas continuam restritos à equipe.
 
-- painel administrativo;
-- catálogo de filmes;
-- cadastro de clientes;
-- empréstimos, devoluções e consultas de atraso.
+Após o login, cada perfil pode acessar:
+
+- `cliente`: catálogo e detalhes dos filmes disponíveis;
+- `funcionario`: painel, catálogo, clientes, empréstimos, devoluções e relatórios operacionais;
+- `administrador`: recursos da equipe e relatórios administrativos.
 
 ## API
 
@@ -135,6 +143,7 @@ O front controller em `public/index.php` expõe rotas para o sistema. As rotas d
 GET  /Locadora-LoucaWeb/public/filmes/{id}
 GET  /Locadora-LoucaWeb/public/clientes?q={termo}
 POST /Locadora-LoucaWeb/public/login-web
+POST /Locadora-LoucaWeb/public/cadastro-cliente-web
 POST /Locadora-LoucaWeb/public/logout-web
 POST /Locadora-LoucaWeb/public/emprestimos
 POST /Locadora-LoucaWeb/public/devolucoes

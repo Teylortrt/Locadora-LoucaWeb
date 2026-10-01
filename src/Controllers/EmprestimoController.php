@@ -6,11 +6,13 @@ class EmprestimoController
 {
     private EmprestimoModel $emprestimoModel;
 
+    // Cria o modelo de empréstimo usando a conexão compartilhada do sistema.
     public function __construct() {
         global $conn; // Pegando a variável $conn do config/conexao.php
         $this->emprestimoModel = new EmprestimoModel($conn);
     }
     
+    // Valida cliente e DVDs, cria o empréstimo e escolhe resposta HTML ou JSON.
     public function criarEmprestimo()
     {
         try {
@@ -54,6 +56,7 @@ class EmprestimoController
         }
     }
 
+    // Consulta os empréstimos pendentes e responde com uma lista JSON.
     public function consultarEmprestimos()
     {
         try {
@@ -66,6 +69,7 @@ class EmprestimoController
         }
     }
 
+    // Retorna os itens ainda pendentes dos empréstimos do cliente informado.
     public function consultarEmprestimosCliente($idCliente)
     {
         try {
@@ -78,6 +82,7 @@ class EmprestimoController
         }
     }
 
+    // Retorna em JSON os empréstimos que passaram do prazo de devolução.
     public function consultarEmprestimosAtrasados()
     {
         try {
@@ -90,13 +95,14 @@ class EmprestimoController
         }
     }
 
-    // Métodos extras vazios para futura implementação (se necessário)
+    // Responde HTTP 501 porque a exclusão de empréstimos ainda não foi implementada.
     public function excluirEmprestimo()
     {
         http_response_code(501);
         echo json_encode(['erro' => 'Não implementado']);
     }
 
+    // Responde HTTP 501 porque a edição de empréstimos ainda não foi implementada.
     public function editarEmprestimo()
     {
         http_response_code(501);

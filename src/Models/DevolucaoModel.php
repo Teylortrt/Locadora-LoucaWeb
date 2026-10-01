@@ -4,15 +4,15 @@ class DevolucaoModel
 {
     private PDO $db;
 
+    // Guarda a conexão usada para calcular e registrar devoluções.
     public function __construct(PDO $conexao)
     {
         $this->db = $conexao;
     }
 
     /**
-     * US28 & US27 - Calcular valor e atraso antes da devolução
-     * Dado o id_emprestimo e uma lista de ids de dvds sendo devolvidos,
-     * retorna o valor original do aluguel, os dias de atraso e o valor da multa (ex: R$ 2 por dia).
+     * Confere se os DVDs pertencem ao empréstimo e ainda estão pendentes.
+     * Retorna valores dos itens, atraso máximo e multa sem gravar a devolução.
      */
     public function calcularValorDevolucao(int $idEmprestimo, array $dvdIds): array
     {
@@ -72,7 +72,8 @@ class DevolucaoModel
     }
 
     /**
-     * US26 - Registrar devolução
+     * Registra a devolução e seus itens em uma única transação.
+     * Se qualquer gravação falhar, desfaz todas as alterações.
      */
     public function registrarDevolucao(int $idEmprestimo, array $dvdIds)
     {

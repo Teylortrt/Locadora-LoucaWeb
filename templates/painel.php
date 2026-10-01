@@ -6,7 +6,7 @@ require_once __DIR__ . '/../src/Models/Dvd.php';
 require_once __DIR__ . '/../src/Models/PainelEmprestimo.php';
 
 $auth = new Auth();
-$auth->exigirLogin();
+$auth->exigirEquipe();
 $usuario = $auth->usuario();
 
 // Caminho base do app (usado no data-raiz do body p/ o autocomplete.js).
@@ -87,6 +87,20 @@ $rotuloCopias = static fn (int $copias): string => $copias > 0
         <form class="form-cadastro" method="GET" action="emprestimos/emprestimos.php">
             <button type="submit" class="botao botao-cadastro">Emprestimos</button>
         </form>
+
+        <form class="form-cadastro" method="GET" action="relatorioEmprestimos.php">
+            <button type="submit" class="botao botao-cadastro">Relatório</button>
+        </form>
+
+        <form class="form-cadastro" method="GET" action="clientesAtrasados.php">
+            <button type="submit" class="botao botao-cadastro">Clientes atrasados</button>
+        </form>
+
+        <?php if (($usuario['perfil'] ?? '') === 'administrador'): ?>
+            <form class="form-cadastro" method="GET" action="filmesMaisAlugados.php">
+                <button type="submit" class="botao botao-cadastro">Filmes mais alugados</button>
+            </form>
+        <?php endif; ?>
 
         <div class="acoes-topo">
             <form class="form-sair" method="POST" action="../public/logout-web">

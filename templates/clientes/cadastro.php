@@ -3,7 +3,7 @@ require_once __DIR__ . '/../../config/conexao.php';
 require_once __DIR__ . '/../../src/Models/Auth.php';
 
 $auth = new Auth();
-$auth->exigirLogin();
+$auth->exigirEquipe();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
