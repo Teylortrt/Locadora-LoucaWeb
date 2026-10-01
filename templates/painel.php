@@ -137,21 +137,15 @@ $rotuloCopias = static fn (int $copias): string => $copias > 0
                     </div>
                 </div>
 
-                <div class="row linha-filme">
-                    <div class="nine columns">
-                        <label for="dvd_id">Filme</label>
-                        <select class="u-full-width" id="dvd_id" name="dvd_id">
-                            <option value="">Selecione um filme...</option>
-                            <?php foreach ($dvdOpcoes as $dvd): ?>
-                                <?php $disponiveis = (int) $dvd['disponivel']; ?>
-                                <option value="<?= (int) $dvd['id'] ?>" <?= $disponiveis > 0 ? '' : 'disabled' ?>>
-                                    <?= htmlspecialchars($dvd['titulo']) ?> — <?= $rotuloCopias($disponiveis) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                <div class="row">
+                    <div class="nine columns autocomplete">
+                        <label for="busca_dvd">Filme</label>
+                        <input class="u-full-width" type="text" id="busca_dvd" placeholder="Digite para buscar um filme..." autocomplete="off">
+                        <input type="hidden" id="dvd_id" name="dvd_id" value="">
+                        <div id="autocomplete-lista-filme" class="autocomplete-lista" style="max-height: 250px; overflow-y: auto;"></div>
                     </div>
-                    <div class="three columns botao-adicionar-col">
-                        <button type="submit" class="button botao-adicionar" name="adicionar_dvd" value="1"
+                    <div class="three columns" style="margin-top: 2.9rem;">
+                        <button type="submit" class="button u-full-width" name="adicionar_dvd" value="1"
                                 formaction="<?= $urlPainel ?>">Adicionar</button>
                     </div>
                 </div>
@@ -186,5 +180,72 @@ $rotuloCopias = static fn (int $copias): string => $copias > 0
     </main>
 
     <script src="emprestimos/autocomplete.js"></script>
+
+    <?php
+    $filmesPainel = [];
+    foreach ($dvdOpcoes as $dvd) {
+        $filmesPainel[] = [
+            'id' => (int) $dvd['id'],
+            'titulo' => $dvd['titulo'],
+            'disponivel' => (int) $dvd['disponivel'],
+            'rotulo' => $rotuloCopias((int) $dvd['disponivel'])
+        ];
+    }
+    ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const filmesPainel = <?= json_encode($filmesPainel) ?>;
+            const inputDvdBusca = document.getElementById('busca_dvd');
+            const inputDvdHidden = document.getElementById('dvd_id');
+            const listaDvdDiv = document.getElementById('autocomplete-lista-filme');
+            const btnAdicionarDvd = document.querySelector('button[name="adicionar_dvd"]');
+
+            inputDvdBusca.addEventListener('input', function() {
+                const val = this.value.toLowerCase();
+                listaDvdDiv.innerHTML = '';
+                inputDvdHidden.value = '';
+
+                if (!val) {
+                    listaDvdDiv.style.display = 'none';
+                    return;
+                }
+
+                const filtrados = filmesPainel.filter(f => f.titulo.toLowerCase().includes(val)).slice(0, 50);
+
+                if (filtrados.length > 0) {
+                    listaDvdDiv.style.display = 'block';
+                    filtrados.forEach(f => {
+                        const item = document.createElement('div');
+                        item.className = 'autocomplete-item';
+                        
+                        if (f.disponivel <= 0) {
+                            item.style.color = '#999';
+                            item.style.cursor = 'not-allowed';
+                            item.innerHTML = f.titulo + ' &mdash; <em>' + f.rotulo + '</em>';
+                        } else {
+                            item.innerHTML = '<strong>' + f.titulo + '</strong> &mdash; <em style="color: #1e7e34;">' + f.rotulo + '</em>';
+                            item.addEventListener('click', function() {
+                                inputDvdBusca.value = f.titulo;
+                                inputDvdHidden.value = f.id;
+                                listaDvdDiv.style.display = 'none';
+                                btnAdicionarDvd.focus();
+                            });
+                        }
+                        
+                        listaDvdDiv.appendChild(item);
+                    });
+                } else {
+                    listaDvdDiv.style.display = 'none';
+                }
+            });
+
+            // Fecha a lista ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (e.target !== inputDvdBusca && e.target !== listaDvdDiv) {
+                    listaDvdDiv.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
