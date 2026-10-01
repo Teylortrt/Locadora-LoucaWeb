@@ -165,12 +165,6 @@ if ($genero !== '') {
                         <div class="detalhes-filme">
                             <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
                             <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
-                            <?php $disp = $dvdModel->verificarDisponibilidade((int) $filme['id']); ?>
-                            <?php if ($disp > 0): ?>
-                                <span class="badge disponivel"><?= $disp ?> cópia(s)</span>
-                            <?php else: ?>
-                                <span class="badge indisponivel">Indisponível</span>
-                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -229,12 +223,6 @@ if ($genero !== '') {
                                 <div class="detalhes-filme">
                                     <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
                                     <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
-                                    <?php $disp = $dvdModel->verificarDisponibilidade((int) $filme['id']); ?>
-                                    <?php if ($disp > 0): ?>
-                                        <span class="badge disponivel"><?= $disp ?> cópia(s)</span>
-                                    <?php else: ?>
-                                        <span class="badge indisponivel">Indisponível</span>
-                                    <?php endif; ?>
                                 </div>
                             </div>
                         </a>
@@ -264,12 +252,6 @@ if ($genero !== '') {
                         <div class="detalhes-filme">
                             <h3><?= htmlspecialchars($filme['titulo']) ?></h3>
                             <p>R$ <?= htmlspecialchars($filme['valor']) ?></p>
-                            <?php $disp = $dvdModel->verificarDisponibilidade((int) $filme['id']); ?>
-                            <?php if ($disp > 0): ?>
-                                <span class="badge disponivel"><?= $disp ?> cópia(s)</span>
-                            <?php else: ?>
-                                <span class="badge indisponivel">Indisponível</span>
-                            <?php endif; ?>
                         </div>
                     </div>
                     </a>
