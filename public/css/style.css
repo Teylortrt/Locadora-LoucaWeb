@@ -79,6 +79,12 @@ body { background: #f7f7f7; }
 .barra-pesquisa input { flex: 1; margin-bottom: 0; }
 .catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 2rem; }
 .resultado-pesquisa h2 { margin-bottom: 1.5rem; }
+.cadastrar-filme .resultado-pesquisa { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1.2rem; margin-top: 2rem; }
+.cadastrar-filme .resultado-item { min-width: 0; padding: 1rem; background: #fff; border: 1px solid #e1e1e1; border-radius: 4px; text-align: center; }
+.cadastrar-filme .resultado-item img, .cadastrar-filme .resultado-item .poster-falso { display: block; width: 100%; aspect-ratio: 2 / 3; }
+.cadastrar-filme .resultado-item img { object-fit: cover; }
+.cadastrar-filme .resultado-item p { min-height: 3.2rem; margin: .8rem 0; font-size: 1.4rem; font-weight: 600; line-height: 1.2; }
+.cadastrar-filme .resultado-item .button { width: 100%; margin-bottom: 0; padding: 0 .6rem; }
 .cartao-filme { display: flex; flex-direction: column; overflow: hidden; background: #fff; border: 1px solid #e1e1e1; border-radius: 6px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
 .poster-imagem, .poster-falso { display: block; width: 100%; aspect-ratio: 2 / 3; }
 .poster-imagem { object-fit: cover; }
@@ -106,9 +112,8 @@ body { background: #f7f7f7; }
 
     /* CSS extra para alinhar os resultados da pesquisa */
     .resultado-pesquisa { display: block; margin-top: 20px; }
-    .resultado-item { width: 150px; text-align: center; }
-    .resultado-item img { max-width: 100%; border-radius: 5px; }
-    .resultado-item p { font-size: 14px; margin: 5px 0; font-weight: bold; }
+    .cadastrar-filme .resultado-pesquisa { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .cadastrar-filme .resultado-item { padding: .7rem; }
 
 /* Detalhes do Filme (página dedicada e modal) */
 .ficha-filme { display: flex; gap: 3rem; align-items: flex-start; padding: 2.5rem; background: #fff; border: 1px solid #e1e1e1; border-radius: 4px; }
