@@ -6,20 +6,13 @@ class DevolucaoController
 {
     private DevolucaoModel $devolucaoModel;
 
-<<<<<<< HEAD
     // Cria o modelo de devolução usando a conexão compartilhada do sistema.
-=======
->>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function __construct() {
         global $conn;
         $this->devolucaoModel = new DevolucaoModel($conn);
     }
     
-<<<<<<< HEAD
     // Lê os DVDs devolvidos, delega o registro ao modelo e responde à tela ou à API.
-=======
-    // US26 - Registrar devolução (vai calcular e já efetivar)
->>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function registrarDevolucao()
     {
         try {
@@ -61,11 +54,7 @@ class DevolucaoController
         }
     }
 
-<<<<<<< HEAD
     // Calcula valores e atraso sem gravar; usado antes da confirmação da devolução.
-=======
-    // US27 e US28 - Apenas calcular atraso e valor sem registrar
->>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function calcularValor()
     {
         try {

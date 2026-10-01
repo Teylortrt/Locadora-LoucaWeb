@@ -13,10 +13,7 @@ class PainelEmprestimo
 
     private \App\Models\Cliente $clienteModel;
 
-<<<<<<< HEAD
     // Inicia a sessão e recebe os modelos usados pelo formulário de empréstimo.
-=======
->>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function __construct(Dvd $dvdModel, \App\Models\Cliente $clienteModel)
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -45,10 +42,7 @@ class PainelEmprestimo
         return $_SESSION['emprestimo_dvds'];
     }
 
-<<<<<<< HEAD
     // Retorna o identificador do cliente escolhido no rascunho da sessão.
-=======
->>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function clienteId(): int
     {
         return isset($_SESSION['emprestimo_cliente']) ? (int) $_SESSION['emprestimo_cliente'] : 0;
@@ -77,10 +71,7 @@ class PainelEmprestimo
 
     // --- Ações do formulário (self-POST) ---
 
-<<<<<<< HEAD
     // Adiciona à sessão um DVD existente para compor o empréstimo em andamento.
-=======
->>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function adicionarDvd(int $idDvd): void
     {
         $dvd = $idDvd > 0 ? $this->dvdModel->buscarComDisponibilidade($idDvd) : null;
@@ -96,20 +87,14 @@ class PainelEmprestimo
         ];
     }
 
-<<<<<<< HEAD
     // Retira da sessão o DVD selecionado, sem gravar um empréstimo no banco.
-=======
->>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function removerDvd(int $idDvd): void
     {
         $this->dvds();
         unset($_SESSION['emprestimo_dvds'][$idDvd]);
     }
 
-<<<<<<< HEAD
     // Guarda na sessão o cliente selecionado para o empréstimo em andamento.
-=======
->>>>>>> b0a8314cc2d9710fe875e1523ce48ae794c99259
     public function definirCliente(int $idCliente): void
     {
         $_SESSION['emprestimo_cliente'] = $idCliente;
