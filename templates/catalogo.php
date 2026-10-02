@@ -188,8 +188,8 @@ if ($genero !== '') {
             <div class="resultado-pesquisa">
                 <h2>
                     <?= $tipoPesquisa === 'ator'
-                        ? 'Filmes com o ator "' . htmlspecialchars($pesquisa) . '":'
-                        : 'Resultados da pesquisa:' ?>
+                        ? 'Filmes com o ator "' . htmlspecialchars($pesquisa, ENT_QUOTES, 'UTF-8') . '":'
+                        : 'Filmes encontrados para "' . htmlspecialchars($pesquisa, ENT_QUOTES, 'UTF-8') . '":' ?>
                 </h2>
                 <?php if (!empty($filtrarFilmes)): ?>
                     <div class="catalogo">
