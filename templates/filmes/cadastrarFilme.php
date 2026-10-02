@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <?php if ($posterPath): ?>
                                             <img src="<?= htmlspecialchars($posterPath) ?>" alt="Poster de <?= htmlspecialchars($filme['title']) ?>" loading="lazy">
                                         <?php else: ?>
-                                            <div style="height: 225px; background: #eee; display: flex; align-items:center; justify-content:center;">Sem Foto</div>
+                                            <div class="poster-falso">Sem Foto</div>
                                         <?php endif; ?>
                                         <p><?= htmlspecialchars($filme['title']) ?></p>
                                         
