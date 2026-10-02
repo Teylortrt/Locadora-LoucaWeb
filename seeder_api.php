@@ -1,15 +1,40 @@
 <?php
 /**
- * Popula o catálogo de filmes e o estoque de DVDs usando a API do TMDB.
+ * ========================================================================
+ * SeederFilmesAPI — Script de Carga Inicial (Seeding) do Acervo
+ * ========================================================================
  *
- * Este script deve ser executado em um ambiente de desenvolvimento ou em uma
- * operação controlada de carga inicial, pois cria registros no banco de dados.
+ * Este script automatiza a população do banco de dados da Locadora LoucaWeb
+ * consumindo a API REST do TMDB (The Movie Database) para simular o acervo
+ * real de aproximadamente 2.000 DVDs físicos, conforme exigido na
+ * especificação do projeto (Item 3 — "Backend PHP & API Integrator").
+ *
+ * Fluxo de execução:
+ *   1. Importa os gêneros do TMDB → tabela `generos`
+ *   2. Percorre páginas de filmes populares → tabela `filmes`
+ *   3. Para cada filme, busca o elenco → tabelas `atores` e `atores_filme` (N:M)
+ *   4. Gera cópias físicas aleatórias (1–5) → tabela `dvds`
+ *   5. Repete até atingir a meta de DVDs (padrão: 2.000)
+ *
+ * Cada filme é inserido dentro de uma TRANSAÇÃO (BEGIN/COMMIT/ROLLBACK),
+ * garantindo as propriedades ACID: ou o filme, seu elenco e seu estoque
+ * são inseridos juntos, ou nada é persistido.
+ *
+ * Requisitos:
+ *   - PHP 8.0+ com extensão cURL habilitada
+ *   - Variável TMDB_API_KEY definida no arquivo .env
+ *   - Banco de dados já criado com as tabelas do DDL (locadora.sql)
+ *
+ * Uso: php seeder_api.php  (executar apenas UMA vez, na carga inicial)
+ *
+ * @see https://developer.themoviedb.org/docs  Documentação oficial da API TMDB
  */
 require_once __DIR__ . '/config/env.php';
 require_once __DIR__ . '/config/conexao.php';
 require_once __DIR__ . '/src/Models/Filmes.php';
 
 // Permite que a carga tenha tempo suficiente para processar várias páginas.
+// O padrão do PHP é 30 segundos, insuficiente para ~100 páginas de requisições HTTP.
 set_time_limit(300);
 
 class SeederFilmesAPI
@@ -81,14 +106,36 @@ class SeederFilmesAPI
                 // Verificação de segurança: interrompe o foreach se a meta já foi batida
                 if ($dvdsGerados >= $metaDvds) break;
 
-                // Para cada filme, fazemos uma requisição adicional para buscar os atores (elenco)
+                // Pula filmes sem título válido (dados incompletos da API)
+                $titulo = trim((string) ($item['title'] ?? ''));
+                if ($titulo === '') {
+                    continue;
+                }
+
+                // ---- PROTEÇÃO CONTRA DUPLICATAS ----
+                // Verifica se o filme já existe no banco pelo título.
+                // Evita registros duplicados caso o seeder seja executado mais de uma vez
+                // ou caso a API retorne o mesmo filme em páginas diferentes.
+                $stmtVerifica = $this->db->prepare(
+                    'SELECT COUNT(*) FROM filmes WHERE titulo = :titulo'
+                );
+                $stmtVerifica->execute(['titulo' => substr($titulo, 0, 100)]);
+                $jaExiste = (int) $stmtVerifica->fetchColumn() > 0;
+                $stmtVerifica->closeCursor(); // Libera o buffer do statement
+
+                if ($jaExiste) {
+                    continue; // Filme já cadastrado, pula para o próximo
+                }
+
+                // Para cada filme, fazemos uma requisição adicional para buscar os atores (elenco).
+                // Isso representa mais uma chamada HTTP por filme, justificando o rate limiting.
                 $elenco = $this->buscarElencoAPI((int) $item['id']);
 
                 // Converte o formato da API para os campos esperados pelo
                 // modelo, usando o gênero correto do filme via mapeamento.
                 $tmdbGenreId = $item['genre_ids'][0] ?? null;
                 $dadosFilme = [
-                    'titulo'     => substr($item['title'], 0, 100), // Limita tamanho para o BD
+                    'titulo'     => substr($titulo, 0, 100),         // Usa o título já validado e sanitizado
                     'valor'      => 10.00,                          // Valor fixo de locação (R$ 10,00)
                     'id_genero'  => isset($mapaGeneros[$tmdbGenreId])
                         ? $mapaGeneros[$tmdbGenreId]
@@ -217,6 +264,7 @@ class SeederFilmesAPI
 
             $buscarGenero->execute(['genero' => $nome]);
             $idLocal = $buscarGenero->fetchColumn();
+            $buscarGenero->closeCursor(); // Libera o buffer para a próxima iteração
 
             if ($idLocal === false) {
                 $criarGenero->execute(['genero' => $nome]);
@@ -238,24 +286,32 @@ class SeederFilmesAPI
 
     /**
      * Função utilitária centralizada para realizar as chamadas HTTP à API do TMDB.
-     * Utiliza a biblioteca cURL nativa do PHP.
+     * Utiliza a biblioteca cURL nativa do PHP, que é a extensão padrão para
+     * requisições HTTP em scripts de linha de comando (CLI).
+     *
+     * Tratamentos de erro implementados:
+     *   - Falha de conexão (sem internet, DNS, timeout) → RuntimeException
+     *   - HTTP status != 200 (401 = chave inválida, 429 = rate limit) → RuntimeException
+     *   - JSON inválido ou resposta vazia → retorna array vazio (fallback seguro)
      * 
      * @param string $url URL completa do endpoint a ser consumido.
      * @return array Resposta JSON convertida em um array associativo do PHP.
+     * @throws RuntimeException Se a conexão falhar ou a API retornar erro HTTP.
      */
     private function fazerRequisicaoAPI(string $url): array
     {
-        // Inicializa a sessão do cURL
+        // Inicializa a sessão do cURL — cada chamada cria uma sessão independente
         $ch = curl_init();
         
         // Define as configurações (options) do cURL
         curl_setopt($ch, CURLOPT_URL, $url);           // URL da requisição
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Retornar a resposta como string em vez de imprimir na tela
 
-        // A validação SSL deve permanecer habilitada em ambientes reais para evitar ataques man-in-the-middle.
+        // A validação SSL deve permanecer habilitada em ambientes reais
+        // para evitar ataques man-in-the-middle (interceptação de tráfego).
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 
-        // Executa a requisição
+        // Executa a requisição HTTP GET
         $resposta = curl_exec($ch);
         
         // Trata falhas na conexão ou comunicação (ex: sem internet, API fora do ar)
@@ -264,9 +320,22 @@ class SeederFilmesAPI
             curl_close($ch);
             throw new RuntimeException("Erro ao consultar a API do TMDB: {$erro}");
         }
-        
-        // Encerra a sessão do cURL para liberar recursos
-        curl_close($ch);
+
+        // ---- VALIDAÇÃO DO STATUS HTTP ----
+        // Verifica se a API retornou sucesso (200 OK).
+        // Erros comuns:
+        //   401 = chave da API inválida ou expirada
+        //   404 = endpoint não encontrado
+        //   429 = excedeu o limite de requisições (rate limit)
+        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch); // Encerra a sessão do cURL para liberar recursos
+
+        if ($httpCode !== 200) {
+            throw new RuntimeException(
+                "A API do TMDB retornou HTTP {$httpCode}. "
+                . "Verifique a chave da API e o limite de requisições."
+            );
+        }
 
         // Decodifica o JSON retornado para um array associativo.
         // Retorna uma lista vazia para que o chamador trate respostas inválidas
@@ -301,6 +370,7 @@ class SeederFilmesAPI
             // Verifica se o ator já está cadastrado
             $buscarAtor->execute(['nome' => substr($nome, 0, 100)]);
             $idAtor = $buscarAtor->fetchColumn();
+            $buscarAtor->closeCursor(); // Libera o buffer para reutilizar o statement no próximo ciclo
 
             // Se o ator não for encontrado no banco (é falso), vamos criá-lo
             if ($idAtor === false) {

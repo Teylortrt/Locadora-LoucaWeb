@@ -1,82 +1,189 @@
-# Locadora LoucaWeb
+# 🎬 Locadora LoucaWeb
 
-Sistema web de gerenciamento de uma locadora de filmes, desenvolvido em PHP puro. O projeto reúne autenticação, cadastro de clientes, catálogo e elenco, estoque de DVDs e fluxos de empréstimo e devolução.
+> Sistema de Gerenciamento e Controle de Locação para Vídeo Locadora
 
-## Visão geral
+[![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![MySQL](https://img.shields.io/badge/MySQL-MariaDB-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![License](https://img.shields.io/badge/Licença-Acadêmico-green)](#licença)
 
-O sistema combina:
+Sistema web desenvolvido em **PHP puro (POO/PDO)** para automatizar a operação de uma vídeo locadora com acervo de aproximadamente **2.000 DVDs**. O catálogo é populado automaticamente via integração com a **API REST do TMDB** (The Movie Database).
 
-- autenticação de usuários via sessão;
-- criação de acesso de cliente com catálogo em modo de leitura;
-- painel administrativo para navegação do sistema;
-- catálogo de filmes em interface web;
-- backend PHP com Models, Controllers e serviços;
-- banco de dados relacional MySQL/MariaDB;
-- integração com o TMDB para consultar informações de filmes e carregar o catálogo inicial.
+---
 
-O projeto foi pensado para funcionar em ambiente local com XAMPP/LAMP e utiliza PDO para acesso ao MySQL.
+## 📋 Índice
 
-## Tecnologias
+- [Visão Geral](#-visão-geral)
+- [Tecnologias](#-tecnologias)
+- [Arquitetura](#-arquitetura)
+- [Funcionalidades](#-funcionalidades)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Instalação e Configuração](#-instalação-e-configuração)
+- [Carga Inicial via TMDB](#-carga-inicial-via-tmdb)
+- [Banco de Dados](#-banco-de-dados)
+- [API REST](#-api-rest)
+- [Documentação do Projeto](#-documentação-do-projeto)
+- [Licença](#-licença)
 
-- PHP 8+
-- MySQL / MariaDB
-- HTML, CSS e JavaScript simples
-- PDO para conexão e consultas ao banco
-- Arquitetura em camadas com Models, Controllers e templates
+---
 
-## Funcionalidades
+## 🎯 Visão Geral
 
-- Login e logout de usuários
-- Cadastro próprio e login de clientes
-- Proteção de páginas por perfil de acesso
-- Cadastro e gerenciamento de clientes
-- Catálogo de filmes disponíveis para clientes, com detalhes e disponibilidade de cópias
-- Registro de empréstimos, itens e devoluções
-- Consulta e filtro de empréstimos atrasados usando a data prevista de entrega
-- Endpoints PHP para operações do sistema e consultas em JSON
-- Script de carga inicial de filmes, gêneros, elenco e estoque via TMDB
+O projeto simula um cenário real de desenvolvimento de software, contemplando:
 
-## Estrutura do projeto
+- **Engenharia de Requisitos** — levantamento de regras de negócio da locadora
+- **Modelagem de Dados** — DER conceitual e modelo lógico/relacional
+- **Implementação Backend** — PHP 8+ com arquitetura em camadas (Models, Controllers, Services)
+- **Integração com API Externa** — consumo da API TMDB para carga automática do acervo
+- **Interface Web** — catálogo público + painel administrativo para funcionários
 
-```text
-Locadora-LoucaWeb/
-├── config/
-│   ├── conexao.php
-│   └── env.php
-├── database/
-│   └── locadora.sql
-├── image/
-│   ├── DER_locadora.mmd
-│   └── DER_locadora.png
-├── public/                 # Front controller, rotas e arquivos públicos
-├── src/
-│   ├── Controllers/
-│   ├── Database/
-│   ├── Models/
-│   └── Services/
-├── templates/
-│   ├── emprestimos/
-│   ├── filmes/
-│   └── ...
-├── CONTRATOS.md
-├── PLANO_EXECUCAO.md
-├── RELATORIO_PROJETO.md
-├── README.md
-├── seeder_api.php
-└── ...
+### Fluxo de Acesso
+
+```
+Visitante → Catálogo Público (sem login) → [Área do Funcionário] → Login → Painel Administrativo
 ```
 
-## Requisitos
+- **Clientes/Visitantes**: acessam o catálogo de filmes com busca, filtros e disponibilidade
+- **Funcionários**: gerenciam clientes, empréstimos, devoluções, estoque e relatórios
 
-- PHP 8 ou superior
-- MySQL/MariaDB
-- Servidor web Apache (XAMPP/LAMP recomendado)
-- Extensões PHP `pdo_mysql` e `curl`
-- Chave de API do TMDB para integração e carga do catálogo
+---
 
-## Configuração do ambiente
+## 🛠️ Tecnologias
 
-### 1. Clone ou baixe o projeto
+| Componente | Tecnologia |
+|---|---|
+| **Backend** | PHP 8.0+ (Nativo, POO) |
+| **Banco de Dados** | MySQL / MariaDB |
+| **Acesso ao BD** | PDO (Prepared Statements) |
+| **Frontend** | HTML5, CSS3 (Skeleton), JavaScript Vanilla |
+| **API Externa** | TMDB (The Movie Database) via cURL |
+| **Servidor** | Apache (XAMPP / LAMP) |
+| **Versionamento** | Git / GitHub |
+
+---
+
+## 🏗️ Arquitetura
+
+O sistema utiliza uma **arquitetura em camadas** inspirada no padrão MVC, sem framework:
+
+```
+┌─────────────────────────────────────────────────┐
+│  Templates (Views)                              │
+│  templates/*.php — HTML + PHP para renderização  │
+├─────────────────────────────────────────────────┤
+│  Controllers                                     │
+│  src/Controllers/ — Regras de negócio e fluxo    │
+├─────────────────────────────────────────────────┤
+│  Models                                          │
+│  src/Models/ — Acesso ao banco via PDO           │
+├─────────────────────────────────────────────────┤
+│  Services                                        │
+│  src/Services/ — Integrações externas (TMDB)     │
+├─────────────────────────────────────────────────┤
+│  Front Controller                                │
+│  public/index.php — Roteamento de requisições    │
+└─────────────────────────────────────────────────┘
+```
+
+**Padrões aplicados:**
+- **Prepared Statements (PDO)** — prevenção contra SQL Injection
+- **Transações ACID** — atomicidade nas operações de empréstimo e carga
+- **Sessões PHP** — autenticação e controle de acesso
+- **Separação de responsabilidades** — Models não conhecem HTML, Views não acessam o banco
+
+---
+
+## ✨ Funcionalidades
+
+### Área Pública (sem login)
+- 📖 Catálogo de filmes com pôsteres, preços e disponibilidade
+- 🔍 Pesquisa por título ou ator
+- 🏷️ Filtro por gênero
+- 📄 Paginação (25 filmes por página)
+- 🪟 Modal com detalhes do filme e sinopse (via TMDB)
+
+### Área Administrativa (login obrigatório)
+- 🔐 Login/Logout com autenticação por sessão
+- 👥 CRUD completo de clientes
+- 🎬 Cadastro de filmes com integração TMDB
+- 🎭 Associação de atores a filmes (relação N:M)
+- 📀 Gestão de estoque de DVDs (quantidade editável por filme)
+- 🗑️ Exclusão de filmes com validação de empréstimos ativos
+- 📋 Painel de empréstimos com autocomplete de clientes e filmes
+- 📤 Registro de devoluções (parcial ou total)
+- ⚠️ Filtro de empréstimos atrasados
+- 📊 Relatórios (filmes mais alugados, clientes atrasados)
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+Locadora-LoucaWeb/
+├── config/
+│   ├── conexao.php              # Conexão PDO com o MySQL
+│   ├── database.php             # Configurações do banco
+│   └── env.php                  # Carrega variáveis do .env
+├── database/
+│   ├── locadora.sql             # DDL completo (schema + dados iniciais)
+│   └── seed_clientes.sql        # 100 clientes fictícios (incorporado ao .sql)
+├── image/
+│   ├── DER_locadora.mmd         # Diagrama ER editável (Mermaid)
+│   └── DER_locadora.png         # Diagrama ER renderizado
+├── public/
+│   ├── index.php                # Front Controller (rotas e API JSON)
+│   ├── css/                     # Stylesheets (Skeleton + custom)
+│   └── js/                      # JavaScript (modal, autocomplete)
+├── src/
+│   ├── Controllers/
+│   │   ├── AuthController.php
+│   │   ├── ClienteController.php
+│   │   ├── DevolucaoController.php
+│   │   ├── DvdController.php
+│   │   ├── EmprestimoController.php
+│   │   └── FilmeController.php
+│   ├── Models/
+│   │   ├── Auth.php             # Autenticação e sessão
+│   │   ├── AtorModel.php        # CRUD de atores e associações
+│   │   ├── Cliente.php          # CRUD de clientes
+│   │   ├── Dvd.php              # Estoque e disponibilidade
+│   │   ├── EmprestimoModel.php  # Empréstimos com validação de cópias livres
+│   │   ├── DevolucaoModel.php   # Devoluções
+│   │   ├── Filmes.php           # Catálogo com filtros e paginação
+│   │   ├── Generos.php          # Gêneros de filme
+│   │   ├── PainelEmprestimo.php # Carrinho de sessão
+│   │   └── Usuario.php          # Gestão de usuários
+│   └── Services/
+│       ├── TmdbClient.php       # Consulta de sinopse ao vivo
+│       └── RelatorioService.php # Geração de relatórios
+├── templates/
+│   ├── catalogo.php             # 🔓 Catálogo público (sem login)
+│   ├── login.php                # Tela de login
+│   ├── painel.php               # Painel administrativo
+│   ├── atores/                  # Listagem e associação de atores
+│   ├── clientes/                # CRUD de clientes
+│   ├── emprestimos/             # Painel de empréstimos
+│   ├── filmes/                  # Catálogo admin, cadastro, estoque
+│   └── relatorio/               # Relatórios operacionais
+├── seeder_api.php               # Script de carga inicial (2.000 DVDs)
+├── RELATORIO_PROJETO.md         # Relatório acadêmico de modelagem
+├── CONTRATOS.md                 # Contratos entre módulos
+├── PLANO_EXECUCAO.md            # Plano de execução
+└── README.md                    # Este arquivo
+```
+
+---
+
+## 🚀 Instalação e Configuração
+
+### Pré-requisitos
+
+- PHP 8.0 ou superior
+- MySQL / MariaDB
+- Apache (XAMPP ou LAMP recomendado)
+- Extensões PHP: `pdo_mysql`, `curl`
+- Chave de API do [TMDB](https://www.themoviedb.org/settings/api)
+
+### 1. Clone o repositório
 
 ```bash
 cd /opt/lampp/htdocs
@@ -84,116 +191,136 @@ git clone <url-do-repositorio>
 cd Locadora-LoucaWeb
 ```
 
-### 2. Configure a conexão com o banco
-
-O projeto usa as configurações locais de `config/conexao.php` (por padrão, MySQL em `127.0.0.1:3306`, banco `locadora` e usuário `root`). Ajuste host, porta, banco, usuário e senha conforme seu ambiente.
-
-### 3. Crie o banco de dados
-
-No phpMyAdmin ou via terminal, importe o script:
+### 2. Crie o banco de dados
 
 ```bash
 mysql -u root -p < database/locadora.sql
 ```
 
-O script cria o schema `locadora`, suas tabelas, relações e usuários iniciais.
-Ele também inclui 100 clientes fictícios para facilitar testes e demonstrações.
+O script cria o schema `locadora`, todas as tabelas com suas relações, 100 clientes fictícios e 2 usuários iniciais para teste.
 
-O arquivo representa o schema atual completo, incluindo prazo previsto de devolução e acesso de clientes. Use-o para criar uma instalação nova. Não o reimporte sobre um banco existente: `CREATE TABLE IF NOT EXISTS` não atualiza tabelas já criadas e os dados iniciais podem ser duplicados. Bancos antigos precisam de atualização de schema planejada e backup antes de usar a versão atual.
+> ⚠️ **Atenção:** Não reimporte sobre um banco existente. O `CREATE TABLE IF NOT EXISTS` não atualiza tabelas já criadas e dados iniciais podem ser duplicados.
 
-O arquivo `database/seed_clientes.sql` foi incorporado ao `database/locadora.sql`; use o arquivo principal em instalações novas.
+### 3. Configure a chave TMDB
 
-### 4. Configure a chave TMDB
-
-Crie um arquivo `.env` na raiz do projeto com a chave da API:
+Crie um arquivo `.env` na raiz do projeto:
 
 ```ini
-TMDB_API_KEY=sua_chave_do_tmdb
+TMDB_API_KEY=sua_chave_aqui
 ```
 
-O `.env` é lido por `config/env.php` e está ignorado pelo Git. Não compartilhe nem versione uma chave real.
+> O `.env` está no `.gitignore` — nunca versione chaves de API.
 
-### 5. Inicie o servidor local
+### 4. Ajuste a conexão (se necessário)
 
-A raiz do projeto usa `public/index.php` como front controller; o `.htaccess` define esse arquivo como página inicial. Acesse:
+Edite `config/conexao.php` caso seu ambiente use host, porta ou credenciais diferentes do padrão (`127.0.0.1:3306`, `root`, sem senha).
 
-```text
+### 5. Acesse o sistema
+
+```
 http://localhost/Locadora-LoucaWeb/
 ```
 
-A página inicial redireciona para a tela de login. Para usar as subrotas listadas abaixo, configure o Apache para encaminhar essas URLs a `public/index.php`; o `.htaccess` fornecido não contém regras de rewrite para elas.
+A página inicial exibe o **catálogo público**. Para acessar o painel administrativo, clique em **"Área do Funcionário"** e faça login.
 
-## Acesso ao sistema
+---
 
-Clientes podem criar uma conta pela tela de login e, após o cadastro, são direcionados ao catálogo de filmes disponíveis. O cliente tem acesso somente de leitura; empréstimos e operações administrativas continuam restritos à equipe.
+## 🌐 Carga Inicial via TMDB
 
-Após o login, cada perfil pode acessar:
-
-- `cliente`: catálogo e detalhes dos filmes disponíveis;
-- `funcionario`: painel, catálogo, clientes, empréstimos, devoluções e relatórios operacionais;
-- `administrador`: recursos da equipe e relatórios administrativos.
-
-## API
-
-O front controller em `public/index.php` expõe rotas para o sistema. As rotas de consulta respondem em JSON; as rotas web de autenticação redirecionam para as páginas da aplicação.
-
-### Rotas implementadas
-
-```text
-GET  /Locadora-LoucaWeb/public/filmes/{id}
-GET  /Locadora-LoucaWeb/public/clientes?q={termo}
-POST /Locadora-LoucaWeb/public/login-web
-POST /Locadora-LoucaWeb/public/cadastro-cliente-web
-POST /Locadora-LoucaWeb/public/logout-web
-POST /Locadora-LoucaWeb/public/emprestimos
-POST /Locadora-LoucaWeb/public/devolucoes
-```
-
-O detalhe do filme inclui sinopse consultada no TMDB, elenco local e disponibilidade calculada. A consulta de clientes é usada no autocomplete de empréstimos. As rotas de login e logout fazem parte do fluxo web; empréstimos e devoluções são enviados aos respectivos controllers.
-
-## Carga inicial via TMDB
-
-O script `seeder_api.php` consulta filmes populares, importa gêneros e elenco e cria registros de estoque. Com o banco configurado e `TMDB_API_KEY` definido, execute-o uma vez a partir da raiz:
+O script `seeder_api.php` popula automaticamente o banco consumindo a API do TMDB:
 
 ```bash
 php seeder_api.php
 ```
 
-A meta configurada é de 2.000 cópias de DVDs, não de 2.000 títulos. Cada filme recebe de 1 a 5 cópias, então o total pode ultrapassar a meta na última inserção. O script foi feito para carga inicial controlada: reexecutá-lo pode duplicar filmes e estoque.
+### O que o script faz:
 
-## Banco de dados
+1. **Importa gêneros** do TMDB → tabela `generos`
+2. **Percorre filmes populares** (paginação automática) → tabela `filmes`
+3. **Busca elenco** de cada filme (top 10 atores) → tabelas `atores` + `atores_filme`
+4. **Gera estoque** aleatório (1–5 cópias por filme) → tabela `dvds`
+5. **Repete** até atingir ~2.000 DVDs no estoque
 
-O schema principal é `locadora`, definido em `database/locadora.sql`, com tabelas como:
+### Proteções implementadas:
 
-- filmes
-- generos
-- clientes
-- atores
-- dvds
-- `emprestimos` (inclui `data_prevista`, usada para identificar atraso)
-- `filmes_emprestimo`
-- `devolucoes` e `filmes_devolucao`
-- `usuarios`
+- ✅ Transação ACID por filme (commit/rollback)
+- ✅ Verificação de duplicatas por título
+- ✅ Validação do HTTP status code da API
+- ✅ Rate limiting (250ms entre páginas)
+- ✅ Tratamento de erros cURL e JSON
+- ✅ Liberação de cursors PDO (`closeCursor`)
 
-O estoque em `dvds.quantidade` representa cópias agregadas por registro, não unidades físicas identificadas individualmente. O elenco N:M entre filmes e atores é representado por `atores_filme`, que também armazena o personagem.
-
-## Documentação do projeto
-
-- [Relatório de modelagem, DDL, integração e defesa](RELATORIO_PROJETO.md)
-- [Diagrama ER editável em Mermaid](image/DER_locadora.mmd)
-- [Imagem do DER](image/DER_locadora.png)
-- [Contratos entre módulos](CONTRATOS.md)
-- [Plano de execução](PLANO_EXECUCAO.md)
-
-## Observações
-
-- O projeto foi desenvolvido em PHP puro, sem framework.
-- A organização está em torno de classes de domínio e controllers.
-- O acesso às páginas administrativas usa autenticação por sessão.
-- O detalhe do filme consulta sinopse no TMDB; para essa consulta, o PHP precisa permitir requisições externas via `file_get_contents` (`allow_url_fopen`).
-
-## Licença
-
-Projeto desenvolvido para fins acadêmicos e de estudo.
+> **Nota:** A meta é de **2.000 cópias em estoque**, não 2.000 títulos. Cada filme recebe 1–5 cópias, resultando em aproximadamente 400–600 títulos distintos.
 
 ---
+
+## 🗄️ Banco de Dados
+
+### Diagrama Entidade-Relacionamento
+
+<div align="center">
+  <img src="image/DER_locadora.png" alt="DER Locadora LoucaWeb" width="500">
+</div>
+
+O arquivo editável em Mermaid está em [`image/DER_locadora.mmd`](image/DER_locadora.mmd).
+
+### Tabelas Principais
+
+| Tabela | Descrição | Relações |
+|---|---|---|
+| `generos` | Categorias de filmes | 1:N com `filmes` |
+| `filmes` | Catálogo de títulos | FK → `generos`; 1:N com `dvds` |
+| `atores` | Cadastro de atores | N:M com `filmes` via `atores_filme` |
+| `atores_filme` | Elenco (tabela associativa) | FKs → `filmes` + `atores`; armazena `personagem` |
+| `dvds` | Estoque de cópias | FK → `filmes`; `quantidade` agregada |
+| `clientes` | Base de clientes | 1:N com `emprestimos` |
+| `emprestimos` | Registro de locações | FK → `clientes`; `data_prevista` para controle de atraso |
+| `filmes_emprestimo` | Itens do empréstimo | FKs → `dvds` + `emprestimos` |
+| `devolucoes` | Registro de devoluções | FK → `emprestimos` |
+| `filmes_devolucao` | Itens devolvidos | FKs → `devolucoes` + `filmes_emprestimo` |
+| `usuarios` | Funcionários do sistema | Autenticação com hash de senha |
+
+### Cálculo de Disponibilidade
+
+A disponibilidade de um DVD é calculada em tempo real:
+
+```
+Cópias livres = dvds.quantidade - COUNT(filmes_emprestimo sem filmes_devolucao)
+```
+
+Isso garante que o sistema nunca permita empréstimos acima do estoque real.
+
+---
+
+## 🔌 API REST
+
+O front controller (`public/index.php`) expõe as seguintes rotas:
+
+| Método | Rota | Descrição |
+|---|---|---|
+| `GET` | `/filmes/{id}` | Detalhes do filme (JSON) com sinopse TMDB, elenco e disponibilidade |
+| `GET` | `/clientes?q={termo}` | Autocomplete de clientes (JSON) |
+| `POST` | `/login-web` | Autenticação (redireciona) |
+| `POST` | `/logout-web` | Encerrar sessão (redireciona) |
+| `POST` | `/emprestimos` | Criar empréstimo |
+| `POST` | `/devolucoes` | Registrar devolução |
+
+---
+
+## 📚 Documentação do Projeto
+
+| Documento | Descrição |
+|---|---|
+| [`RELATORIO_PROJETO.md`](RELATORIO_PROJETO.md) | Relatório acadêmico: modelagem, DDL, integração e defesa |
+| [`image/DER_locadora.mmd`](image/DER_locadora.mmd) | Diagrama ER editável (Mermaid) |
+| [`image/DER_locadora.png`](image/DER_locadora.png) | Diagrama ER renderizado |
+| [`CONTRATOS.md`](CONTRATOS.md) | Contratos de integração entre módulos |
+| [`PLANO_EXECUCAO.md`](PLANO_EXECUCAO.md) | Plano de execução do projeto |
+| [`database/locadora.sql`](database/locadora.sql) | DDL completo do banco de dados |
+| [`seeder_api.php`](seeder_api.php) | Script de carga inicial documentado |
+
+---
+
+## 📄 Licença
+
+Projeto desenvolvido para fins acadêmicos e de estudo.

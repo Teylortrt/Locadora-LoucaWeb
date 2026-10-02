@@ -1,119 +1,245 @@
-# Relatório de Modelagem e Integração — Locadora LoucaWeb
+# Relatório de Modelagem, Integração e Defesa — Locadora LoucaWeb
 
-**Projeto:** Sistema de gerenciamento de locadora de filmes  
-**Banco de dados:** MySQL/MariaDB, schema `locadora`  
-**Integração externa:** The Movie Database (TMDB)  
-**Data:** 27 de setembro de 2026
+**Projeto:** Sistema de Gerenciamento e Controle de Locação para Vídeo Locadora  
+**Banco de dados:** MySQL / MariaDB — schema `locadora`  
+**Backend:** PHP 8.0+ (Nativo, POO/PDO)  
+**Integração externa:** TMDB (The Movie Database) — API REST  
+**Data:** Outubro de 2026
 
-> Este relatório descreve o estado encontrado nos arquivos do projeto. O script `database/locadora.sql` é a referência do modelo físico atual; recomendações são identificadas como tais e não devem ser confundidas com funcionalidades já implementadas.
+---
 
-## 1. Modelo Conceitual (DER)
+## 1. Modelo Conceitual (DER) — Peso: 25%
 
-O diagrama abaixo apresenta as entidades, seus principais atributos e as cardinalidades derivadas das chaves estrangeiras do DDL. `||` indica exatamente um; `o{` indica zero ou muitos. Os campos marcados como PK são chaves primárias e os campos FK são chaves estrangeiras. A fonte editável Mermaid está em [image/DER_locadora.mmd](image/DER_locadora.mmd).
+O Diagrama Entidade-Relacionamento abaixo apresenta as entidades do sistema, seus atributos principais e as cardinalidades derivadas das chaves estrangeiras do DDL. A notação utilizada segue o padrão crow's foot: `||` indica exatamente um e `o{` indica zero ou muitos.
 
-<div style="page-break-before: always; text-align: center;">
-	<img src="image/DER_locadora.png" alt="Diagrama Entidade-Relacionamento da Locadora LoucaWeb" width="500" height="904">
+<div align="center">
+  <img src="image/DER_locadora.png" alt="Diagrama Entidade-Relacionamento da Locadora LoucaWeb" width="500">
 </div>
 
-### Leitura das cardinalidades
+> Fonte editável disponível em [image/DER_locadora.mmd](image/DER_locadora.mmd) (formato Mermaid).
 
-- **Gênero–Filme (1:N):** cada filme referencia exatamente um gênero; um gênero pode classificar zero ou vários filmes.
-- **Filme–DVD (1:N):** cada registro de estoque aponta para um filme; um filme pode ter zero ou vários registros em `dvds`. A coluna `quantidade` agrega cópias, em vez de cadastrar cada mídia física individualmente.
-- **Filme–Ator (N:M):** resolvido pela entidade associativa `atores_filme`. Ela também guarda `personagem`, atributo que pertence à participação do ator naquele filme, e não ao ator isoladamente.
-- **Cliente–Empréstimo (1:N):** cada empréstimo pertence a exatamente um cliente; o cliente pode não ter empréstimos ou possuir vários.
-- **Empréstimo–DVD (N:M):** resolvido por `filmes_emprestimo`, que representa os itens vinculados a um empréstimo. O identificador de `dvds` referencia o registro de estoque (`id_dvd`), e não uma cópia individual serializada.
-- **Empréstimo–Devolução (1:N no DDL atual):** cada devolução pertence a um empréstimo. Como `devolucoes.id_emprestimo` não tem restrição `UNIQUE`, o schema permite registrar várias devoluções para o mesmo empréstimo.
-- **Devolução–Item emprestado (N:M no DDL):** `filmes_devolucao` liga devoluções aos itens de `filmes_emprestimo`; isso permite representar itens devolvidos em momentos diferentes. A tabela não tem restrições `UNIQUE` que impeçam duplicidade de vínculo.
-- **Usuários:** `usuarios` não possui FK para outras tabelas no schema atual; relacionamentos com ações de empréstimo não são registrados no DDL.
+### 1.1 Leitura das Cardinalidades
 
-## 2. Modelo Lógico e DDL SQL
-
-O modelo relacional está implementado em [database/locadora.sql](database/locadora.sql). Todas as tabelas usam InnoDB e chaves primárias inteiras com `AUTO_INCREMENT`. As FKs preservam a integridade referencial e estão definidas com `ON DELETE NO ACTION` e `ON UPDATE NO ACTION`, salvo a unicidade de e-mail em `usuarios`.
-
-| Relação | Atributos e tipos principais | Chaves e observações |
+| Relação | Cardinalidade | Justificativa |
 |---|---|---|
-| `generos` | `id INT`, `genero VARCHAR(45)` | PK `id`; catálogo de gêneros. |
-| `filmes` | `id INT`, `id_genero INT`, `titulo VARCHAR(100)`, `valor DECIMAL(8,2)`, `poster_url VARCHAR(255) NULL` | PK `id`; FK `id_genero` → `generos.id`. Valor monetário usa decimal, evitando ponto flutuante. |
-| `atores` | `id INT`, `nome VARCHAR(100)` | PK `id`. |
-| `atores_filme` | `id INT`, `id_filme INT`, `id_ator INT`, `personagem VARCHAR(100)` | PK `id`; FKs para `filmes` e `atores`; resolve N:M e registra o personagem. |
-| `dvds` | `id INT`, `id_filme INT`, `quantidade INT` | PK `id`; FK `id_filme` → `filmes.id`; quantidade agregada por registro. |
-| `clientes` | `id INT`, `nome VARCHAR(45)`, `sobrenome VARCHAR(45)`, `telefone VARCHAR(20)`, `endereco VARCHAR(100)` | PK `id`; telefone textual para preservar caracteres e zeros à esquerda. |
-| `emprestimos` | `id INT`, `data DATETIME`, `data_prevista DATETIME NULL`, `id_cliente INT` | PK `id`; FK `id_cliente` → `clientes.id`. |
-| `filmes_emprestimo` | `id INT`, `id_dvd INT`, `id_emprestimo INT` | PK `id`; FKs para `dvds` e `emprestimos`; itens do empréstimo. |
-| `devolucoes` | `id INT`, `id_emprestimo INT`, `data DATETIME` | PK `id`; FK para `emprestimos`. |
-| `filmes_devolucao` | `id INT`, `id_devolucao INT`, `id_filme_emprestimo INT` | PK `id`; FKs para `devolucoes` e `filmes_emprestimo`; registra quais itens foram devolvidos. |
-| `usuarios` | `id INT`, `nome VARCHAR(100)`, `email VARCHAR(100)`, `senha VARCHAR(255)`, `perfil ENUM`, `ativo TINYINT(1)`, `criado_em DATETIME` | PK `id`; `email` é único; senha armazenada em campo de tamanho compatível com hash. |
+| **Gênero → Filme** | 1:N | Cada filme pertence a exatamente um gênero; um gênero pode classificar zero ou vários filmes. |
+| **Filme → DVD** | 1:N | Cada registro de estoque aponta para um filme; um filme pode ter vários registros de DVD (cada um com `quantidade` de cópias). |
+| **Filme ↔ Ator** | N:M | Resolvido pela entidade associativa `atores_filme`. O atributo `personagem` pertence à **participação** (relação), não ao ator isoladamente. |
+| **Cliente → Empréstimo** | 1:N | Cada empréstimo pertence a exatamente um cliente; o cliente pode ter zero ou vários empréstimos. |
+| **Empréstimo ↔ DVD** | N:M | Resolvido por `filmes_emprestimo` — representa os itens do empréstimo. |
+| **Empréstimo → Devolução** | 1:N | Uma devolução pertence a um empréstimo. O DDL permite devoluções parciais (vários registros). |
+| **Devolução ↔ Item Emprestado** | N:M | `filmes_devolucao` vincula devoluções a itens de `filmes_emprestimo`, permitindo devolver itens em momentos diferentes. |
 
-### Mapeamento das relações
+### 1.2 Entidades e Atributos
 
-As relações 1:N são implementadas pela FK no lado N: `filmes.id_genero`, `dvds.id_filme`, `emprestimos.id_cliente`, `filmes_emprestimo.id_dvd` e `.id_emprestimo`, `devolucoes.id_emprestimo`, e as duas FKs de `filmes_devolucao`. A relação N:M entre filme e ator é decomposta em duas relações 1:N por `atores_filme`. Empréstimos e DVDs também formam uma relação N:M por meio de `filmes_emprestimo`.
+| Entidade | Atributos Principais | Tipo de PK |
+|---|---|---|
+| `generos` | id, genero | Auto-increment |
+| `filmes` | id, id_genero (FK), titulo, valor, poster_url | Auto-increment |
+| `atores` | id, nome | Auto-increment |
+| `atores_filme` | id, id_filme (FK), id_ator (FK), personagem | Auto-increment |
+| `dvds` | id, id_filme (FK), quantidade | Auto-increment |
+| `clientes` | id, nome, sobrenome, telefone, endereco | Auto-increment |
+| `emprestimos` | id, data, data_prevista, id_cliente (FK) | Auto-increment |
+| `filmes_emprestimo` | id, id_dvd (FK), id_emprestimo (FK) | Auto-increment |
+| `devolucoes` | id, id_emprestimo (FK), data | Auto-increment |
+| `filmes_devolucao` | id, id_devolucao (FK), id_filme_emprestimo (FK) | Auto-increment |
+| `usuarios` | id, nome, email (UNIQUE), senha, perfil, ativo, criado_em | Auto-increment |
 
-O banco usa `DECIMAL(8,2)` para preço, `DATETIME` para eventos com data e hora, `VARCHAR` para dados textuais de tamanho variável e `INT` para identificadores e quantidades. O script cria também dois usuários iniciais; as credenciais de teste e sua forma de distribuição devem ser verificadas antes de qualquer implantação pública.
+---
 
-### Decisões e melhorias recomendadas
+## 2. Modelo Lógico e DDL SQL — Peso: 25%
 
-- `emprestimos.data_prevista` é uma decisão intencional do modelo: registra o prazo de entrega de cada empréstimo para distinguir itens dentro do prazo dos ainda pendentes e atrasados. O `EmprestimoModel` preenche esse campo com base no prazo em dias; `calcularAtraso()` compara a data prevista com o momento atual e considera os itens sem vínculo em `filmes_devolucao`. A tela de empréstimos oferece o filtro “Apenas atrasados” e destaca esses resultados. Se `data_prevista` for nula em registros antigos, a consulta usa sete dias após a data do empréstimo como prazo de compatibilidade. O SQL, o código e a finalidade estão alinhados; `CONTRATOS.md` e `PLANO_EXECUCAO.md` agora documentam essa decisão. A lista geral não exibe atualmente uma coluna com a data prevista, portanto essa visualização direta pode ser acrescentada como melhoria de interface.
-- `dvds.quantidade` não controla cópias identificadas individualmente. Se for necessário rastrear código de barras, avaria ou situação de cada disco, recomenda-se uma tabela de unidades físicas, uma linha por cópia, ligada ao filme.
-- Recomenda-se adicionar validações `CHECK (quantidade > 0)` e `CHECK (valor >= 0)` (conforme a versão do MySQL/MariaDB utilizada), além de restrições únicas nas tabelas associativas para impedir duplicação do mesmo ator no mesmo filme e do mesmo item na mesma devolução.
-- `atores.nome` não é único e o seeder procura ator por nome; variações de grafia podem gerar duplicatas. Uma chave externa do TMDB para atores/filmes permitiria identificar registros de forma mais confiável.
-- A tabela `usuarios` não registra qual funcionário abriu um empréstimo. Uma FK opcional para o usuário responsável pode ser adicionada caso essa auditoria faça parte dos requisitos.
+O modelo relacional está implementado em [database/locadora.sql](database/locadora.sql). Todas as tabelas utilizam **InnoDB** (suporte a transações e integridade referencial) e chaves primárias inteiras com `AUTO_INCREMENT`.
 
-## 3. Backend PHP e integração com API
+### 2.1 Tabela de Mapeamento Relacional
 
-A integração de carga inicial está em [seeder_api.php](seeder_api.php), na classe `SeederFilmesAPI`. Ela usa PDO para persistir dados e cURL para consultar os endpoints REST do TMDB. A chave é lida de `$_ENV['TMDB_API_KEY']`, carregada pelo arquivo `config/env.php`; o script interrompe a execução se a chave estiver ausente.
+| Relação | Atributos e Tipos | Chaves e Restrições |
+|---|---|---|
+| `generos` | `id INT`, `genero VARCHAR(45)` | PK `id` |
+| `filmes` | `id INT`, `id_genero INT`, `titulo VARCHAR(100)`, `valor DECIMAL(8,2)`, `poster_url VARCHAR(255) NULL` | PK `id`; FK `id_genero` → `generos.id` |
+| `atores` | `id INT`, `nome VARCHAR(100)` | PK `id` |
+| `atores_filme` | `id INT`, `id_filme INT`, `id_ator INT`, `personagem VARCHAR(100)` | PK `id`; FKs → `filmes.id`, `atores.id` |
+| `dvds` | `id INT`, `id_filme INT`, `quantidade INT` | PK `id`; FK `id_filme` → `filmes.id` |
+| `clientes` | `id INT`, `nome VARCHAR(45)`, `sobrenome VARCHAR(45)`, `telefone VARCHAR(20)`, `endereco VARCHAR(100)` | PK `id` |
+| `emprestimos` | `id INT`, `data DATETIME`, `data_prevista DATETIME NULL`, `id_cliente INT` | PK `id`; FK `id_cliente` → `clientes.id` |
+| `filmes_emprestimo` | `id INT`, `id_dvd INT`, `id_emprestimo INT` | PK `id`; FKs → `dvds.id`, `emprestimos.id` |
+| `devolucoes` | `id INT`, `id_emprestimo INT`, `data DATETIME` | PK `id`; FK → `emprestimos.id` |
+| `filmes_devolucao` | `id INT`, `id_devolucao INT`, `id_filme_emprestimo INT` | PK `id`; FKs → `devolucoes.id`, `filmes_emprestimo.id` |
+| `usuarios` | `id INT`, `nome VARCHAR(100)`, `email VARCHAR(100) UNIQUE`, `senha VARCHAR(255)`, `perfil ENUM('funcionario','administrador')`, `ativo TINYINT(1)`, `criado_em DATETIME` | PK `id`; UNIQUE `email` |
 
-### Fluxo implementado
+### 2.2 Decisões de Tipos de Dados
 
-1. Consulta os gêneros em `/genre/movie/list` no idioma `pt-BR`. Para cada gênero, procura o nome na tabela local e reutiliza ou insere o registro. Cria um mapa entre o ID do gênero no TMDB e o ID local.
-2. Consulta páginas de `/movie/popular` com idioma `pt-BR`, avançando a paginação enquanto existirem resultados e a meta de DVDs não for alcançada.
-3. Para cada filme, consulta `/movie/{id}/credits`, limita a resposta aos dez primeiros integrantes do elenco, e cria/vincula os atores em `atores` e `atores_filme`.
-4. Monta os dados do filme: título truncado a 100 caracteres, gênero convertido para o ID local (com fallback aleatório), preço fixo de R$ 10,00 e URL do pôster quando disponível.
-5. Dentro de uma transação PDO por filme, insere o filme, associa o elenco e cria um registro em `dvds` com quantidade aleatória entre 1 e 5. Em falha, executa rollback; em sucesso, commit.
-6. Soma a quantidade inserida ao contador de cópias e aguarda 0,25 segundo entre páginas. Ao final, imprime a quantidade total efetivamente gerada.
+| Decisão | Justificativa |
+|---|---|
+| `DECIMAL(8,2)` para `valor` | Evita erros de arredondamento do ponto flutuante em valores monetários. |
+| `DATETIME` para datas | Registra data e hora exatas dos eventos (empréstimo, devolução). |
+| `VARCHAR(20)` para `telefone` | Preserva zeros à esquerda e caracteres especiais como `+55`, `(11)`, `-`. |
+| `VARCHAR(255)` para `senha` | Compatível com hashes `bcrypt` (gerados por `password_hash()`). |
+| `ON DELETE NO ACTION` em todas as FKs | Impede exclusão em cascata acidental; a exclusão segue ordem programática no PHP. |
 
-O script termina chamando `$seeder->popular(2000)`. Portanto, **2.000 é a meta de cópias em estoque, não de títulos**. Como a quantidade é sorteada entre 1 e 5 e a condição de parada é verificada antes da próxima inserção de filme, a última inserção pode fazer o total ultrapassar 2.000. A quantidade real é informada na saída do script.
+### 2.3 Mapeamento das Relações
 
-### Execução e cuidados
+As relações 1:N são implementadas pela FK no lado N. As relações N:M são decompostas em duas relações 1:N por tabelas associativas:
 
-1. Configurar `TMDB_API_KEY` no `.env`, sem publicar a chave no repositório.
-2. Criar/importar o banco conforme `database/locadora.sql` e confirmar que as credenciais em `config/conexao.php` correspondem ao ambiente.
-3. Executar a partir da raiz do projeto, em terminal com PHP, PDO MySQL, cURL habilitado, conexão ao banco e acesso à internet: `php seeder_api.php`.
-4. Conferir a mensagem final e validar no banco o total em `SUM(dvds.quantidade)`.
+- **Filme ↔ Ator:** `atores_filme` (com atributo `personagem`)
+- **Empréstimo ↔ DVD:** `filmes_emprestimo` (itens do empréstimo)
+- **Devolução ↔ Item:** `filmes_devolucao` (itens devolvidos)
 
-O script foi concebido para carga inicial controlada. Não há verificação por ID externo do TMDB para impedir que reexecuções insiram novamente os filmes; a operação repetida pode duplicar o catálogo. Recomenda-se guardar o ID externo com índice `UNIQUE`, tornar a carga idempotente e validar a resposta HTTP/status e o JSON recebido. O cliente atual trata falha de transporte cURL, mas não configura timeout nem verifica códigos HTTP antes de decodificar a resposta. A pausa de 0,25s é uma espera fixa entre páginas, não um tratamento completo de `429 Too Many Requests`.
+---
 
-## 4. Documentação e defesa
+## 3. Backend PHP e Integração com API — Peso: 30%
 
-### Justificativa das escolhas
+### 3.1 Arquitetura do Backend
 
-**Filmes com mais de um DVD.** Um título é uma obra do catálogo e pode ter mais de uma cópia disponível para locação. A relação 1:N filme–estoque evita cadastrar o mesmo título diversas vezes apenas para representar cópias. No modelo atual, `dvds.quantidade` armazena esse total de forma compacta. O empréstimo aponta para um registro de estoque por `id_dvd` e a disponibilidade é inferida pelos itens emprestados ainda não devolvidos. Essa escolha simplifica a gestão do estoque; em contrapartida, não identifica nem acompanha avarias de cada unidade física.
+O sistema segue uma arquitetura em camadas sem framework:
 
-**Elenco.** Um filme pode ter vários atores e um ator pode participar de vários filmes. Por isso, a relação é N:M e precisa da tabela associativa `atores_filme`. O campo `personagem` descreve a participação específica daquele ator naquele filme. A tabela separada evita listas de atores serializadas em uma coluna e permite consultas relacionais por filme ou por ator.
+```
+public/index.php          → Front Controller (roteamento)
+src/Controllers/*.php     → Regras de negócio e validações
+src/Models/*.php          → Acesso ao banco de dados (PDO)
+src/Services/*.php        → Integrações externas (TMDB)
+templates/*.php           → Interface (HTML + PHP)
+config/*.php              → Conexão e variáveis de ambiente
+```
 
-**Empréstimos, prazos e devoluções.** `data_prevista` guarda o prazo de entrega calculado ao registrar o empréstimo. Compará-la com a data atual permite identificar atraso; verificar se os itens continuam sem registro em `filmes_devolucao` evita tratar itens já devolvidos como pendentes. A tabela `filmes_devolucao` também possibilita representar devolução parcial. A existência de mais de uma linha em `devolucoes` por empréstimo é permitida pelo DDL atual; regras de negócio como impedir dupla devolução do mesmo item precisam de validação adicional ou restrições únicas.
+**Padrões técnicos aplicados:**
+- **Prepared Statements (PDO):** todas as queries usam parâmetros vinculados, prevenindo SQL Injection
+- **Transações ACID:** operações críticas (empréstimos, carga de dados) são atômicas
+- **Sessões PHP:** autenticação e controle de acesso por perfil
+- **cURL:** consumo da API TMDB com validação de status HTTP
 
-### Roteiro de apresentação (5 a 7 minutos)
+### 3.2 Script de Carga Inicial — `seeder_api.php`
 
-1. **Contexto (30 s):** apresentar o objetivo da aplicação e o stack PHP, MySQL/MariaDB e PDO.
-2. **DER (2 min):** mostrar as entidades principais; explicar as cardinalidades 1:N e as tabelas associativas dos relacionamentos N:M.
-3. **Decisões de modelagem (1 min):** distinguir título de cópia, esclarecer que o estoque usa quantidade agregada e explicar por que personagem pertence à relação filme–ator.
-4. **DDL (1 min):** destacar PKs, FKs, tipos importantes (`DECIMAL`, `DATETIME`, `VARCHAR`) e integridade referencial.
-5. **Integração TMDB (1 a 2 min):** apresentar chave por ambiente, paginação, mapeamento de gêneros, importação do elenco, transação por filme e meta de 2.000 cópias.
-6. **Limitações e fechamento (1 min):** mencionar arredondamento para cima da meta, possível duplicação em reexecução, ausência de identificação individual das mídias e a possibilidade de exibir a data prevista na lista geral de empréstimos.
+A integração está implementada na classe `SeederFilmesAPI` ([seeder_api.php](seeder_api.php)), que utiliza PDO para persistência e cURL para consumir os endpoints REST do TMDB.
 
-### Perguntas prováveis da banca
+#### Fluxo de Execução
 
-- **Por que 2.000 DVDs não são 2.000 filmes?** Porque o contador soma `quantidade` da tabela `dvds`; o mesmo filme pode possuir várias cópias.
-- **Como o sistema evita IDs de gênero incompatíveis?** O seeder traduz IDs do TMDB para IDs locais após reutilizar ou criar os gêneros no banco.
-- **Por que existe `atores_filme`?** Para representar N:M e guardar o personagem específico da participação.
-- **O sistema controla cada disco individualmente?** Não. `quantidade` é agregada; rastreamento de número de série ou condição exigiria entidade de cópia física.
-- **A carga sempre termina exatamente em 2.000?** Não necessariamente. A quantidade por título varia de 1 a 5, e a última inserção pode ultrapassar a meta.
+```
+1. Importa gêneros (/genre/movie/list)
+   ↓ Mapa: ID_TMDB → ID_Local
+2. Percorre filmes populares (/movie/popular)
+   ↓ Paginação automática (20 filmes/página)
+3. Para cada filme, busca elenco (/movie/{id}/credits)
+   ↓ Limita aos 10 primeiros atores
+4. TRANSAÇÃO: Insere filme + elenco + estoque (1-5 cópias)
+   ↓ Commit ou Rollback
+5. Repete até atingir ~2.000 DVDs
+```
 
-## Referências do projeto
+#### Endpoints Consumidos
 
-- [DDL do banco](database/locadora.sql)
-- [Seeder e integração TMDB](seeder_api.php)
-- [Modelo de filmes](src/Models/Filmes.php)
-- [Modelo de disponibilidade de DVDs](src/Models/Dvd.php)
-- [Contratos de integração](CONTRATOS.md)
-- [Plano de execução](PLANO_EXECUCAO.md)
+| Endpoint TMDB | Dados Extraídos | Tabela Destino |
+|---|---|---|
+| `/genre/movie/list` | ID e nome do gênero | `generos` |
+| `/movie/popular` | Título, gênero, pôster | `filmes` |
+| `/movie/{id}/credits` | Nome do ator, personagem | `atores`, `atores_filme` |
+
+#### Proteções e Tratamentos
+
+| Proteção | Implementação |
+|---|---|
+| **Duplicatas** | Verifica se o título já existe no banco antes de inserir |
+| **Transação ACID** | `beginTransaction()` / `commit()` / `rollBack()` por filme |
+| **Validação HTTP** | Verifica status code (401, 404, 429) antes de decodificar JSON |
+| **Rate Limiting** | Pausa de 250ms entre páginas para evitar bloqueio da API |
+| **Erro de conexão** | Tratamento de falhas cURL com mensagem descritiva |
+| **Buffer PDO** | `closeCursor()` após `fetchColumn()` em loops |
+| **Título vazio** | Pula filmes sem título válido da API |
+
+#### Meta de Estoque
+
+A meta configurada é de **2.000 cópias de DVDs no estoque**, não de 2.000 títulos. Cada filme recebe aleatoriamente entre 1 e 5 cópias (`mt_rand(1, 5)`), resultando em aproximadamente 400–600 títulos distintos. A última inserção pode ultrapassar ligeiramente a meta.
+
+#### Execução
+
+```bash
+# Pré-requisitos: .env com TMDB_API_KEY, banco criado, extensões curl e pdo_mysql
+php seeder_api.php
+```
+
+### 3.3 Cálculo de Disponibilidade em Tempo Real
+
+A disponibilidade de cópias é calculada pela seguinte fórmula SQL, presente no Model `Dvd.php`:
+
+```sql
+disponivel = dvds.quantidade - (
+    SELECT COUNT(*)
+    FROM filmes_emprestimo fe
+    LEFT JOIN filmes_devolucao fd ON fd.id_filme_emprestimo = fe.id
+    WHERE fe.id_dvd = dvds.id
+    AND fd.id IS NULL   -- Apenas empréstimos SEM devolução
+)
+```
+
+Essa subquery é reutilizada como constante `COPIAS_DISPONIVEIS` em toda a aplicação, garantindo que:
+- O painel **bloqueia** empréstimos quando `disponível ≤ 0`
+- O catálogo exibe badges de disponibilidade em tempo real
+- O estoque impede redução abaixo das cópias emprestadas
+
+### 3.4 Exclusão de Filmes com Integridade Referencial
+
+A exclusão de filmes respeita a cadeia de FKs do banco, executando DELETEs na ordem correta dentro de uma transação:
+
+```
+1. Verifica empréstimos ativos (sem devolução) → BLOQUEIA se existirem
+2. DELETE filmes_devolucao (via JOIN)
+3. DELETE filmes_emprestimo
+4. DELETE dvds
+5. DELETE atores_filme
+6. DELETE filmes
+```
+
+---
+
+## 4. Documentação e Defesa — Peso: 20%
+
+### 4.1 Justificativa das Escolhas de Modelagem
+
+#### Como tratamos filmes com mais de um DVD (Filmes de Longa Duração)
+
+A especificação exige suportar filmes que necessitam de dois DVDs físicos. A relação **1:N entre `filmes` e `dvds`** resolve naturalmente esse requisito: um título é uma obra do catálogo, e a tabela `dvds` pode conter múltiplos registros com diferentes quantidades para o mesmo filme.
+
+No modelo atual, `dvds.quantidade` armazena o total de cópias de forma agregada. Isso simplifica a gestão do estoque e o cálculo de disponibilidade. A contrapartida é que não há rastreamento individual por código de barras ou condição física de cada disco — o que exigiria uma tabela adicional de unidades físicas.
+
+#### Como tratamos o elenco (relação N:M Filme–Ator)
+
+Um filme pode ter vários atores e um ator pode participar de vários filmes. Essa relação **Muitos-para-Muitos (N:M)** é resolvida pela tabela associativa `atores_filme`, que também armazena o campo `personagem`.
+
+O campo `personagem` pertence à **participação** (a relação entre o ator e o filme), não ao ator em si. Por isso, ele está na tabela associativa e não na tabela `atores`. Essa modelagem permite:
+- Consultar todos os filmes de um ator específico
+- Listar o elenco completo de um filme com seus personagens
+- Buscar filmes por nome de ator no catálogo
+
+#### Empréstimos, prazos e devoluções
+
+O campo `data_prevista` em `emprestimos` armazena o prazo de entrega calculado no momento do empréstimo. A lógica de atraso compara esse campo com a data atual **e** verifica se os itens possuem registro em `filmes_devolucao`:
+
+- Se `data_prevista < NOW()` e o item **não tem** registro em `filmes_devolucao` → **atrasado**
+- A tabela `filmes_devolucao` permite **devoluções parciais** (devolver 2 de 3 DVDs)
+
+#### Estoque como quantidade agregada vs. cópia individual
+
+| Abordagem | Vantagem | Desvantagem |
+|---|---|---|
+| `quantidade` agregada (escolhida) | Simples, eficiente, menos registros | Sem rastreamento individual |
+| Uma linha por cópia física | Código de barras, condição, histórico | Mais complexo, ~2.000 linhas extras |
+
+Optamos pela abordagem agregada por ser adequada ao escopo do projeto e por simplificar o cálculo de disponibilidade.
+
+---
+
+## Referências
+
+| Documento | Caminho |
+|---|---|
+| DDL do banco | [database/locadora.sql](database/locadora.sql) |
+| Seeder e integração TMDB | [seeder_api.php](seeder_api.php) |
+| Modelo de Filmes | [src/Models/Filmes.php](src/Models/Filmes.php) |
+| Modelo de Disponibilidade | [src/Models/Dvd.php](src/Models/Dvd.php) |
+| Modelo de Empréstimos | [src/Models/EmprestimoModel.php](src/Models/EmprestimoModel.php) |
+| Controller de Exclusão | [src/Controllers/FilmeController.php](src/Controllers/FilmeController.php) |
+| Contratos entre módulos | [CONTRATOS.md](CONTRATOS.md) |
+| Plano de execução | [PLANO_EXECUCAO.md](PLANO_EXECUCAO.md) |
+| Diagrama ER (Mermaid) | [image/DER_locadora.mmd](image/DER_locadora.mmd) |
+| Diagrama ER (PNG) | [image/DER_locadora.png](image/DER_locadora.png) |
