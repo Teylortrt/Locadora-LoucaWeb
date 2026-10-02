@@ -9,17 +9,19 @@ $auth = new Auth();
 $auth->exigirEquipe();
 $usuario = $auth->usuario();
 
-// Caminho base do app (usado no data-raiz do body p/ o autocomplete.js).
+// Calcula a raiz da aplicação para que links e chamadas da API funcionem
+// mesmo quando o projeto estiver dentro de uma subpasta do servidor.
 $diretorioProjeto = str_replace('\\', '/', dirname(__DIR__));
 $documentRoot     = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']), '/');
 $raizApp          = '/' . trim(str_replace($documentRoot, '', $diretorioProjeto), '/');
 $urlPainel        = $raizApp . '/templates/painel.php';
 
-// Toda a lógica do empréstimo rápido (filmes disponíveis, DVDs escolhidos,
-// cliente e limpeza após a confirmação) fica no model; aqui só o formulário.
+// O model mantém o rascunho do empréstimo na sessão e fornece as opções
+// necessárias para renderizar novamente o formulário após cada ação.
 $painel = new PainelEmprestimo(new Dvd($conn), new \App\Models\Cliente($conn));
 
-// Ações self-POST (Adicionar/Remover DVD) — nenhum JS envolvido.
+// Adicionar e remover DVDs atualiza o rascunho no servidor. O redirecionamento
+// evita reenviar o POST quando a página for atualizada.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['adicionar_dvd'])) {
         $painel->adicionarDvd((int) ($_POST['dvd_id'] ?? 0));
@@ -37,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Empréstimo confirmado com sucesso: limpa o rascunho.
+// A confirmação é processada pela API; ao voltar com sucesso, limpa o rascunho.
 if (isset($_GET['sucesso'])) {
     $painel->limpar();
 }
@@ -107,7 +109,7 @@ $rotuloCopias = static fn (int $copias): string => $copias > 0
             <p class="descricao">Use o menu para acessar as operações da locadora.</p>
         </section>
 
-        <!-- Empréstimo rápido: cliente por autocomplete, filmes por select + Adicionar -->
+        <!-- Cliente e filme são selecionados antes de confirmar o empréstimo. -->
         <section class="painel-card">
             <header class="cabecalho-pagina">
                 <h2>Realizar um Empréstimo</h2>
@@ -126,6 +128,7 @@ $rotuloCopias = static fn (int $copias): string => $copias > 0
                     <div class="six columns">
                         <label for="busca_cliente">Cliente</label>
                         <div class="autocomplete">
+                            <!-- O texto serve para buscar; o formulário envia o ID selecionado. -->
                             <input type="hidden" id="id_cliente" name="id_cliente" value="<?= (int) $clienteId ?>">
                             <input type="text" class="autocomplete-input u-full-width" data-ac
                                    data-target="id_cliente" data-url="/clientes"
@@ -187,6 +190,7 @@ $rotuloCopias = static fn (int $copias): string => $copias > 0
         </section>
     </main>
 
+    <!-- Busca remota de clientes pela API; o autocomplete de filmes abaixo usa dados já carregados. -->
     <script src="emprestimos/autocomplete.js"></script>
 
     <?php
@@ -202,6 +206,7 @@ $rotuloCopias = static fn (int $copias): string => $copias > 0
     ?>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Os filmes disponíveis são embutidos para filtrar sem uma chamada por tecla.
             const filmesPainel = <?= json_encode($filmesPainel) ?>;
             const inputDvdBusca = document.getElementById('busca_dvd');
             const inputDvdHidden = document.getElementById('dvd_id');
@@ -211,6 +216,7 @@ $rotuloCopias = static fn (int $copias): string => $copias > 0
             inputDvdBusca.addEventListener('input', function() {
                 const val = this.value.toLowerCase();
                 listaDvdDiv.innerHTML = '';
+                // Texto alterado invalida a seleção anterior até escolher outro DVD.
                 inputDvdHidden.value = '';
 
                 if (!val) {
